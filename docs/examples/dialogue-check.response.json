@@ -1,0 +1,82 @@
+{
+  "mode": "dialogue_check",
+  "risk_score": 95,
+  "risk_level": "critical",
+  "summary": "Critical communication risk detected across 5 pattern(s). Treat the message as unsafe until independently verified.",
+  "detected_patterns": [
+    {
+      "id": "SCAM_PIG_BUTCHERING",
+      "name": "Pig butchering investment grooming",
+      "category": "romance_investment",
+      "weight": 48,
+      "matched_phrases": [
+        "I care about you",
+        "private investment group"
+      ],
+      "confidence": 0.8,
+      "evidence_snippet": "I care about you and this is a private investment group. Do not ask anyone else. Send crypto today before the window closes."
+    },
+    {
+      "id": "SCAM_FAKE_TOKEN_PRESALE",
+      "name": "Fake token presale",
+      "category": "crypto",
+      "weight": 41,
+      "matched_phrases": [
+        "send crypto today"
+      ],
+      "confidence": 0.74,
+      "evidence_snippet": "investment group. Do not ask anyone else. Send crypto today before the window closes."
+    },
+    {
+      "id": "SCAM_FAKE_INVESTMENT_GROUP",
+      "name": "Fake investment group",
+      "category": "investment",
+      "weight": 37,
+      "matched_phrases": [
+        "private investment group"
+      ],
+      "confidence": 0.73,
+      "evidence_snippet": "I care about you and this is a private investment group. Do not ask anyone else. Send crypto today before the window closes."
+    },
+    {
+      "id": "MANIP_ISOLATION",
+      "name": "Isolation",
+      "category": "isolation",
+      "weight": 34,
+      "matched_phrases": [
+        "do not ask anyone else"
+      ],
+      "confidence": 0.71,
+      "evidence_snippet": "you and this is a private investment group. Do not ask anyone else. Send crypto today before the window closes."
+    },
+    {
+      "id": "MANIP_URGENCY_PRESSURE",
+      "name": "Urgency pressure",
+      "category": "pressure",
+      "weight": 30,
+      "matched_phrases": [
+        "window closes"
+      ],
+      "confidence": 0.7,
+      "evidence_snippet": "anyone else. Send crypto today before the window closes."
+    }
+  ],
+  "red_flags": [
+    "Mixes personal trust with investment pressure.",
+    "Moves the target toward a private platform or group.",
+    "Requests crypto for an unverified presale.",
+    "Uses scarcity and exclusivity to rush payment.",
+    "Pushes private group access as a path to profit.",
+    "Uses social proof and secrecy around investing.",
+    "Rushed deadline",
+    "Discourages deliberation",
+    "Separation from advisors",
+    "Discourages independent review",
+    "Uses urgency or deadline pressure.",
+    "Requests a risky payment method, credential, or verification code.",
+    "Avoids independent verification or outside advice."
+  ],
+  "recommended_action": "Pause the interaction and verify the counterparty independently before taking action.",
+  "safe_reply": null,
+  "disclaimer": "BS Man Risk API analyzes communication risk signals only. It is not legal advice, financial advice, a lie detector, or a guarantee that something is true or false."
+}

@@ -1,0 +1,352 @@
+[
+  {
+    "id": "MANIP_URGENCY_PRESSURE",
+    "category": "pressure",
+    "name": "Urgency pressure",
+    "description": "Pushes immediate action before the person can verify or reflect.",
+    "common_phrases": ["decide now", "must decide today", "expires in one hour", "act immediately", "window closes"],
+    "signals": ["Rushed deadline", "Discourages deliberation"],
+    "risk_weight": 30,
+    "safe_response_strategy": "Slow the pace and ask for written details that can be checked independently."
+  },
+  {
+    "id": "MANIP_SCARCITY_PRESSURE",
+    "category": "pressure",
+    "name": "Scarcity pressure",
+    "description": "Uses limited availability to reduce careful decision-making.",
+    "common_phrases": ["only chance", "last chance", "limited slots", "almost gone", "only a few left"],
+    "signals": ["Artificial scarcity", "Pressure to decide quickly"],
+    "risk_weight": 24,
+    "safe_response_strategy": "Treat scarcity claims as unverified and wait until the offer can be checked."
+  },
+  {
+    "id": "MANIP_GUILT_TRIPPING",
+    "category": "emotional_pressure",
+    "name": "Guilt-tripping",
+    "description": "Uses guilt or emotional debt to push compliance.",
+    "common_phrases": ["after everything I did", "you owe me", "refusing this proves", "you never cared", "I did for you"],
+    "signals": ["Emotional debt framing", "Compliance tied to care"],
+    "risk_weight": 28,
+    "safe_response_strategy": "Separate emotional claims from the request and restate boundaries calmly."
+  },
+  {
+    "id": "MANIP_SHAME_PRESSURE",
+    "category": "emotional_pressure",
+    "name": "Shame pressure",
+    "description": "Uses embarrassment or moral judgment to force a response.",
+    "common_phrases": ["you should be ashamed", "what kind of person", "only selfish people", "this is embarrassing", "prove you are decent"],
+    "signals": ["Personal attack", "Shame used as leverage"],
+    "risk_weight": 26,
+    "safe_response_strategy": "Do not answer the insult; ask for facts and keep the boundary."
+  },
+  {
+    "id": "MANIP_AUTHORITY_PRESSURE",
+    "category": "authority",
+    "name": "Authority pressure",
+    "description": "Claims authority or official status to override normal caution.",
+    "common_phrases": ["official department", "compliance team", "legal office", "I am authorized", "tax authority"],
+    "signals": ["Authority claim", "Request bypasses normal verification"],
+    "risk_weight": 30,
+    "safe_response_strategy": "Verify authority through official channels before taking any action."
+  },
+  {
+    "id": "MANIP_TRUST_PRESSURE",
+    "category": "trust",
+    "name": "Trust pressure",
+    "description": "Frames hesitation as distrust or betrayal.",
+    "common_phrases": ["if you trusted me", "just trust me", "why do you doubt me", "trust is everything", "do not question me"],
+    "signals": ["Trust used to avoid verification", "Hesitation framed as betrayal"],
+    "risk_weight": 28,
+    "safe_response_strategy": "State that verification is normal and not a personal rejection."
+  },
+  {
+    "id": "MANIP_LOVE_BOMBING",
+    "category": "emotional_pressure",
+    "name": "Love bombing",
+    "description": "Uses intense affection or fast intimacy to lower skepticism.",
+    "common_phrases": ["I love you", "soulmate", "only person I trust", "meant to be", "our future together"],
+    "signals": ["Fast intimacy", "Affection tied to compliance"],
+    "risk_weight": 24,
+    "safe_response_strategy": "Slow the relationship pace and avoid financial or credential decisions."
+  },
+  {
+    "id": "MANIP_ISOLATION",
+    "category": "isolation",
+    "name": "Isolation",
+    "description": "Discourages outside advice or independent review.",
+    "common_phrases": ["do not ask anyone else", "do not tell anyone", "keep this between us", "your family does not understand", "they will ruin this"],
+    "signals": ["Separation from advisors", "Discourages independent review"],
+    "risk_weight": 34,
+    "safe_response_strategy": "Pause and discuss the request with a trusted independent person."
+  },
+  {
+    "id": "MANIP_GASLIGHTING",
+    "category": "distortion",
+    "name": "Gaslighting",
+    "description": "Denies or distorts prior facts to make the person doubt their judgment.",
+    "common_phrases": ["you are imagining things", "that never happened", "you always misunderstand", "you are being paranoid", "your memory is wrong"],
+    "signals": ["Reality denial", "Undermines confidence"],
+    "risk_weight": 30,
+    "safe_response_strategy": "Return to written facts and avoid debating memory under pressure."
+  },
+  {
+    "id": "MANIP_FEAR_APPEAL",
+    "category": "fear",
+    "name": "Fear appeal",
+    "description": "Uses frightening outcomes to force action.",
+    "common_phrases": ["you will lose everything", "police will come", "account will be locked", "there will be consequences", "you will regret"],
+    "signals": ["Threatened consequence", "Fear used to reduce analysis"],
+    "risk_weight": 34,
+    "safe_response_strategy": "Verify the alleged threat through official sources before responding."
+  },
+  {
+    "id": "MANIP_FALSE_EXPERTISE",
+    "category": "authority",
+    "name": "False expertise",
+    "description": "Claims special knowledge to discourage questions.",
+    "common_phrases": ["I am an expert", "my proprietary method", "I know the market", "trust my analysis", "professionals know this"],
+    "signals": ["Unsupported expertise claim", "Discourages scrutiny"],
+    "risk_weight": 24,
+    "safe_response_strategy": "Ask for verifiable credentials, evidence, and independent sources."
+  },
+  {
+    "id": "MANIP_SOCIAL_PROOF",
+    "category": "social_proof",
+    "name": "Social proof manipulation",
+    "description": "Uses unverifiable group behavior or testimonials to pressure agreement.",
+    "common_phrases": ["everyone is joining", "many people already paid", "our members are making money", "look at these testimonials", "all successful clients"],
+    "signals": ["Unverified testimonials", "Crowd behavior used as proof"],
+    "risk_weight": 24,
+    "safe_response_strategy": "Treat testimonials as claims and ask for independent verification."
+  },
+  {
+    "id": "MANIP_RECIPROCITY_PRESSURE",
+    "category": "emotional_pressure",
+    "name": "Reciprocity pressure",
+    "description": "Uses a prior favor or gift to demand compliance.",
+    "common_phrases": ["I helped you before", "you owe me a favor", "return the favor", "after what I gave you", "I did this for you"],
+    "signals": ["Favor turned into obligation", "Compliance framed as repayment"],
+    "risk_weight": 24,
+    "safe_response_strategy": "Acknowledge the favor without accepting unsafe obligations."
+  },
+  {
+    "id": "MANIP_SUNK_COST_PRESSURE",
+    "category": "pressure",
+    "name": "Sunk cost pressure",
+    "description": "Uses prior time or money spent to push deeper commitment.",
+    "common_phrases": ["you already invested", "do not waste what you paid", "too late to stop", "finish what you started", "one more payment"],
+    "signals": ["Prior cost used as leverage", "Escalates commitment"],
+    "risk_weight": 28,
+    "safe_response_strategy": "Evaluate the next step on its own risk, not on prior spending."
+  },
+  {
+    "id": "MANIP_SECRECY_DEMAND",
+    "category": "isolation",
+    "name": "Secrecy demand",
+    "description": "Requires secrecy around the request, payment, or relationship.",
+    "common_phrases": ["keep this secret", "confidential opportunity", "do not tell", "between us only", "private matter"],
+    "signals": ["Secrecy requested", "Avoids oversight"],
+    "risk_weight": 32,
+    "safe_response_strategy": "Refuse secrecy and require independent review for risky decisions."
+  },
+  {
+    "id": "MANIP_BLAME_SHIFTING",
+    "category": "distortion",
+    "name": "Blame shifting",
+    "description": "Makes the target responsible for the manipulator's actions or consequences.",
+    "common_phrases": ["this is your fault", "you made me do this", "because of you", "you caused this", "if you had listened"],
+    "signals": ["Responsibility inversion", "Blame used to control"],
+    "risk_weight": 24,
+    "safe_response_strategy": "Do not accept responsibility for another person's coercive actions."
+  },
+  {
+    "id": "MANIP_MINIMIZATION",
+    "category": "distortion",
+    "name": "Minimization",
+    "description": "Downplays meaningful risk or harm to push action.",
+    "common_phrases": ["it is no big deal", "just a small fee", "nothing can go wrong", "only takes a minute", "just send it"],
+    "signals": ["Risk downplayed", "Pressure to skip review"],
+    "risk_weight": 22,
+    "safe_response_strategy": "Name the actual risk and ask for time to verify."
+  },
+  {
+    "id": "MANIP_MOVING_GOALPOSTS",
+    "category": "control",
+    "name": "Moving goalposts",
+    "description": "Changes requirements after each compliance step.",
+    "common_phrases": ["one more step", "now you need to pay", "almost finished", "just another verification", "final requirement"],
+    "signals": ["Repeated new conditions", "Escalating demands"],
+    "risk_weight": 28,
+    "safe_response_strategy": "Stop the sequence and require a complete written process before continuing."
+  },
+  {
+    "id": "MANIP_FALSE_DILEMMA",
+    "category": "logic_trap",
+    "name": "False dilemma",
+    "description": "Presents only two options when safer alternatives exist.",
+    "common_phrases": ["either you do this or", "only two choices", "now or never", "pay or lose it", "with us or against us"],
+    "signals": ["Artificial binary", "Safer options hidden"],
+    "risk_weight": 24,
+    "safe_response_strategy": "Reject the forced binary and look for safer alternatives."
+  },
+  {
+    "id": "MANIP_FLATTERY_MANIPULATION",
+    "category": "emotional_pressure",
+    "name": "Flattery manipulation",
+    "description": "Uses praise to lower resistance and create obligation.",
+    "common_phrases": ["you are smarter than others", "special opportunity for you", "I chose you", "you are different", "only someone like you"],
+    "signals": ["Praise tied to request", "Specialness used as leverage"],
+    "risk_weight": 20,
+    "safe_response_strategy": "Set aside praise and evaluate the request on evidence."
+  },
+  {
+    "id": "MANIP_INTIMIDATION",
+    "category": "coercion",
+    "name": "Intimidation",
+    "description": "Uses aggressive tone, threats, or implied harm to force compliance.",
+    "common_phrases": ["you better", "do not make me", "I know where you live", "you will be sorry", "last warning"],
+    "signals": ["Threatening language", "Fear-based compliance"],
+    "risk_weight": 36,
+    "safe_response_strategy": "Do not engage further if unsafe; preserve evidence and seek help."
+  },
+  {
+    "id": "MANIP_EMOTIONAL_BLACKMAIL",
+    "category": "coercion",
+    "name": "Emotional blackmail",
+    "description": "Threatens emotional harm, exposure, or abandonment to force action.",
+    "common_phrases": ["I will expose you", "release private photos", "everyone you know", "you will ruin me", "I cannot live without this"],
+    "signals": ["Threat of exposure or harm", "Emotional stakes used as leverage"],
+    "risk_weight": 40,
+    "safe_response_strategy": "Do not comply under blackmail; preserve evidence and seek trusted support."
+  },
+  {
+    "id": "MANIP_CONFUSION_FLOODING",
+    "category": "confusion",
+    "name": "Confusion flooding",
+    "description": "Overloads the person with complex or fast-changing details to reduce clarity.",
+    "common_phrases": ["too complicated to explain", "just follow the steps", "do not overthink", "many moving parts", "I will guide you quickly"],
+    "signals": ["Complexity used to bypass understanding", "Fast instruction sequence"],
+    "risk_weight": 26,
+    "safe_response_strategy": "Stop and request a simple written explanation before doing anything."
+  },
+  {
+    "id": "MANIP_OVERCONFIDENCE_FRAMING",
+    "category": "certainty",
+    "name": "Overconfidence framing",
+    "description": "Uses extreme confidence to make uncertainty seem settled.",
+    "common_phrases": ["cannot fail", "100% safe", "nothing to worry about", "sure thing", "guaranteed outcome"],
+    "signals": ["Excessive certainty", "Risk dismissed"],
+    "risk_weight": 26,
+    "safe_response_strategy": "Ask for evidence and assume uncertainty remains until verified."
+  },
+  {
+    "id": "MANIP_FAKE_CERTAINTY",
+    "category": "certainty",
+    "name": "Fake certainty",
+    "description": "Presents uncertain claims as established facts.",
+    "common_phrases": ["it is guaranteed", "confirmed profit", "definitely approved", "no chance of failure", "already verified"],
+    "signals": ["Unsupported certainty", "No evidence for definitive claims"],
+    "risk_weight": 26,
+    "safe_response_strategy": "Require verifiable evidence and avoid irreversible action."
+  },
+  {
+    "id": "MANIP_LOYALTY_TEST",
+    "category": "trust",
+    "name": "Loyalty test",
+    "description": "Frames compliance as proof of loyalty, love, or commitment.",
+    "common_phrases": ["you owe me loyalty", "prove you care", "prove your loyalty", "if you really loved me", "real friends help"],
+    "signals": ["Relationship test", "Boundary framed as betrayal"],
+    "risk_weight": 28,
+    "safe_response_strategy": "Reject tests of loyalty that require unsafe actions."
+  },
+  {
+    "id": "MANIP_DEPENDENCY_CREATION",
+    "category": "control",
+    "name": "Dependency creation",
+    "description": "Makes the person feel they need the manipulator for decisions, access, or safety.",
+    "common_phrases": ["only I can help you", "you need me", "without me you will fail", "I handle everything", "do exactly what I say"],
+    "signals": ["Creates reliance", "Discourages independent action"],
+    "risk_weight": 28,
+    "safe_response_strategy": "Rebuild independent verification and involve trusted outside support."
+  },
+  {
+    "id": "MANIP_CRISIS_FRAMING",
+    "category": "fear",
+    "name": "Crisis framing",
+    "description": "Frames the situation as a crisis requiring immediate compliance.",
+    "common_phrases": ["emergency", "crisis", "right now or else", "urgent situation", "no time to explain"],
+    "signals": ["Crisis language", "No time for verification"],
+    "risk_weight": 30,
+    "safe_response_strategy": "Use official emergency or support channels rather than following the message."
+  },
+  {
+    "id": "MANIP_HUMILIATION_AVOIDANCE",
+    "category": "shame",
+    "name": "Humiliation avoidance",
+    "description": "Warns that refusal or verification will cause embarrassment or exposure.",
+    "common_phrases": ["avoid embarrassment", "everyone will know", "save your reputation", "do not make this public", "you will look foolish"],
+    "signals": ["Embarrassment threat", "Reputation pressure"],
+    "risk_weight": 28,
+    "safe_response_strategy": "Prioritize safety and verification over avoiding embarrassment."
+  },
+  {
+    "id": "MANIP_MORAL_PRESSURE",
+    "category": "moral_pressure",
+    "name": "Moral pressure",
+    "description": "Uses moral identity or virtue to push a specific action.",
+    "common_phrases": ["good people help", "do the right thing", "only a bad person refuses", "your duty", "be compassionate"],
+    "signals": ["Moral identity leveraged", "Refusal framed as immoral"],
+    "risk_weight": 24,
+    "safe_response_strategy": "Keep values separate from unsafe or unverifiable requests."
+  },
+  {
+    "id": "MANIP_IDENTITY_PRESSURE",
+    "category": "identity",
+    "name": "Identity pressure",
+    "description": "Uses someone's role, identity, or self-image to pressure compliance.",
+    "common_phrases": ["as a real entrepreneur", "people like you", "if you are serious", "successful people act fast", "be a leader"],
+    "signals": ["Identity tied to compliance", "Self-image leveraged"],
+    "risk_weight": 22,
+    "safe_response_strategy": "Evaluate the request without tying it to identity or status."
+  },
+  {
+    "id": "MANIP_NORMALIZATION_EVERYONE_DOES_IT",
+    "category": "normalization",
+    "name": "Everyone does it normalization",
+    "description": "Normalizes questionable behavior by claiming it is common.",
+    "common_phrases": ["everyone does it", "this is normal", "all clients do this", "standard practice", "no one checks"],
+    "signals": ["Questionable action normalized", "Social comparison used to lower caution"],
+    "risk_weight": 22,
+    "safe_response_strategy": "Ask for official policy or documentation rather than accepting normalization."
+  },
+  {
+    "id": "MANIP_URGENCY_SECRECY_COMBO",
+    "category": "pressure",
+    "name": "Urgency and secrecy combo",
+    "description": "Combines a deadline with a secrecy request.",
+    "common_phrases": ["do not tell anyone and act now", "keep this secret today", "secret deal expires", "confidential and urgent", "between us before midnight"],
+    "signals": ["Deadline plus secrecy", "High-risk pressure pattern"],
+    "risk_weight": 38,
+    "safe_response_strategy": "Refuse secrecy, delay action, and seek independent review."
+  },
+  {
+    "id": "MANIP_COMMITMENT_ESCALATION",
+    "category": "control",
+    "name": "Commitment escalation",
+    "description": "Starts with small requests and escalates to riskier actions.",
+    "common_phrases": ["start small", "next step", "increase your deposit", "upgrade now", "you are almost there"],
+    "signals": ["Escalating requests", "Small commitment used to unlock larger one"],
+    "risk_weight": 28,
+    "safe_response_strategy": "Pause before each escalation and reassess from zero."
+  },
+  {
+    "id": "MANIP_VERIFICATION_AVOIDANCE",
+    "category": "avoidance",
+    "name": "Verification avoidance",
+    "description": "Avoids calls, official channels, documentation, or third-party checks.",
+    "common_phrases": ["cannot talk right now", "do not call", "no need to verify", "skip the paperwork", "trust the process"],
+    "signals": ["Avoids normal verification", "Discourages documentation"],
+    "risk_weight": 32,
+    "safe_response_strategy": "Stop until the person or claim can be verified through a trusted channel."
+  }
+]

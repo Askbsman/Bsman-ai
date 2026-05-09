@@ -1,0 +1,31 @@
+{
+  "mode": "offer_check",
+  "risk_score": 90,
+  "risk_level": "critical",
+  "summary": "Critical communication risk detected across 1 pattern(s). Treat the message as unsafe until independently verified.",
+  "detected_patterns": [
+    {
+      "id": "SCAM_CRYPTO_GUARANTEED_RETURNS",
+      "name": "Crypto guaranteed returns",
+      "category": "crypto_investment",
+      "weight": 66,
+      "matched_phrases": [
+        "20% weekly returns",
+        "no risk",
+        "guarantees 20% weekly returns"
+      ],
+      "confidence": 0.81,
+      "evidence_snippet": "This crypto investment guarantees 20% weekly returns with no risk if you wire money now."
+    }
+  ],
+  "red_flags": [
+    "Promises guaranteed returns in a volatile market.",
+    "Downplays or denies investment risk.",
+    "Uses urgency or deadline pressure.",
+    "Requests a risky payment method, credential, or verification code.",
+    "Offer lacks clear independently verifiable details."
+  ],
+  "recommended_action": "Request verifiable company details, written terms, and avoid upfront or off-platform payment.",
+  "safe_reply": null,
+  "disclaimer": "BS Man Risk API analyzes communication risk signals only. It is not legal advice, financial advice, a lie detector, or a guarantee that something is true or false."
+}

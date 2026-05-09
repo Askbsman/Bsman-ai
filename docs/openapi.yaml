@@ -1,0 +1,289 @@
+openapi: 3.1.0
+info:
+  title: BS Man Risk API
+  version: 0.1.0
+  description: Conversation Risk Intelligence API for AI agents.
+servers:
+  - url: http://localhost:3000
+paths:
+  /:
+    get:
+      summary: Service metadata
+      operationId: getServiceMetadata
+      responses:
+        "200":
+          description: Public service metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceMetadata"
+  /health:
+    get:
+      summary: Health check
+      operationId: getHealth
+      responses:
+        "200":
+          description: Service health status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /docs/openapi.yaml:
+    get:
+      summary: OpenAPI YAML
+      operationId: getOpenApiYaml
+      responses:
+        "200":
+          description: OpenAPI document in YAML format.
+          content:
+            text/yaml:
+              schema:
+                type: string
+  /v1/analyze:
+    post:
+      summary: Analyze communication risk signals
+      operationId: analyzeConversationRisk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeRequest"
+            examples:
+              scamCheck:
+                value:
+                  mode: scam_check
+                  language: en
+                  input: Your wallet is suspended. Click this urgent link and enter your seed phrase.
+              safeReply:
+                value:
+                  mode: safe_reply
+                  language: en
+                  input: Send the deposit now and do not tell anyone. This deal expires in one hour.
+                  options:
+                    tone: calm_firm
+      responses:
+        "200":
+          description: Structured communication risk analysis.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyzeResponse"
+        "400":
+          description: Validation or unsupported-language error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    ServiceMetadata:
+      type: object
+      required:
+        - name
+        - description
+        - version
+        - endpoints
+      properties:
+        name:
+          type: string
+          const: BS Man AI
+        description:
+          type: string
+          const: Conversation Risk Intelligence API for AI agents.
+        version:
+          type: string
+        endpoints:
+          type: object
+          required:
+            - health
+            - analyze
+            - openapi
+          properties:
+            health:
+              type: string
+            analyze:
+              type: string
+            openapi:
+              type: string
+    HealthResponse:
+      type: object
+      required:
+        - ok
+        - service
+        - version
+      properties:
+        ok:
+          type: boolean
+          const: true
+        service:
+          type: string
+          const: bsman-risk-api
+        version:
+          type: string
+    AnalyzeRequest:
+      type: object
+      required:
+        - mode
+      properties:
+        mode:
+          type: string
+          enum:
+            - scam_check
+            - dialogue_check
+            - offer_check
+            - manipulation_check
+            - safe_reply
+        language:
+          type: string
+          description: Language code. BS Man AI v0.1 supports only en.
+          default: en
+        locale:
+          type: string
+          description: Future locale hint. Accepted for forward compatibility but not used for scoring in v0.1.
+        input:
+          type: string
+          minLength: 1
+          maxLength: 12000
+          description: English text to analyze.
+        conversation:
+          type: array
+          description: Optional multi-message conversation. When present, all message content is analyzed together.
+          minItems: 1
+          maxItems: 40
+          items:
+            type: object
+            required:
+              - content
+            properties:
+              role:
+                type: string
+                maxLength: 60
+              content:
+                type: string
+                minLength: 1
+                maxLength: 4000
+        options:
+          type: object
+          properties:
+            tone:
+              type: string
+              enum:
+                - calm_firm
+                - polite
+                - direct
+                - neutral
+              description: Safe reply tone. Defaults to calm_firm.
+    DetectedPattern:
+      type: object
+      required:
+        - id
+        - name
+        - category
+        - weight
+        - matched_phrases
+        - confidence
+        - evidence_snippet
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        weight:
+          type: integer
+          minimum: 0
+          maximum: 100
+        matched_phrases:
+          type: array
+          items:
+            type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        evidence_snippet:
+          type: string
+          maxLength: 160
+    AnalyzeResponse:
+      type: object
+      required:
+        - mode
+        - risk_score
+        - risk_level
+        - summary
+        - detected_patterns
+        - red_flags
+        - recommended_action
+        - safe_reply
+        - disclaimer
+      properties:
+        mode:
+          type: string
+          enum:
+            - scam_check
+            - dialogue_check
+            - offer_check
+            - manipulation_check
+            - safe_reply
+        risk_score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        risk_level:
+          type: string
+          enum:
+            - low
+            - medium
+            - high
+            - critical
+        summary:
+          type: string
+        detected_patterns:
+          type: array
+          items:
+            $ref: "#/components/schemas/DetectedPattern"
+        red_flags:
+          type: array
+          items:
+            type: string
+        recommended_action:
+          type: string
+        safe_reply:
+          type:
+            - string
+            - "null"
+        disclaimer:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+            - details
+          properties:
+            code:
+              type: string
+              enum:
+                - VALIDATION_ERROR
+                - UNSUPPORTED_LANGUAGE
+                - INTERNAL_ERROR
+            message:
+              type: string
+            details:
+              oneOf:
+                - type: array
+                  items: {}
+                - type: object

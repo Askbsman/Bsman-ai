@@ -1,0 +1,36 @@
+{
+  "name": "bsman-ai",
+  "version": "0.1.0",
+  "description": "Conversation Risk Intelligence API for AI agents.",
+  "type": "module",
+  "private": false,
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "x402",
+    "ai-agents",
+    "scam-detection",
+    "risk-analysis",
+    "conversation-intelligence"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@hono/node-server": "^1.19.6",
+    "@hono/zod-validator": "^0.7.0",
+    "hono": "^4.10.7",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
