@@ -1,0 +1,8 @@
+{
+  "mode": "safe_reply",
+  "language": "en",
+  "input": "Send the deposit now and do not tell anyone. This deal expires in one hour.",
+  "options": {
+    "tone": "calm_firm"
+  }
+}

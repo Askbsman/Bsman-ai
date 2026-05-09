@@ -1,0 +1,410 @@
+[
+  {
+    "id": "TC_CRYPTO_GUARANTEED_RETURNS",
+    "mode": "scam_check",
+    "input": "This crypto investment guarantees 20% weekly returns with no risk if you wire money now.",
+    "expected": {
+      "risk_level": "critical",
+      "must_detect": ["SCAM_CRYPTO_GUARANTEED_RETURNS"],
+      "must_include_red_flags": ["guaranteed returns"]
+    }
+  },
+  {
+    "id": "TC_FAKE_TRADING_BOT",
+    "mode": "offer_check",
+    "input": "Our AI trading bot never loses and creates passive income after you connect your exchange account.",
+    "expected": {
+      "min_risk_score": 55,
+      "must_detect": ["SCAM_FAKE_TRADING_BOT"]
+    }
+  },
+  {
+    "id": "TC_PIG_BUTCHERING_DIALOGUE",
+    "mode": "dialogue_check",
+    "input": "I care about you, so do not ask anyone else. Invest in this private group today before the window closes.",
+    "expected": {
+      "min_risk_score": 50,
+      "must_detect": ["MANIP_ISOLATION", "MANIP_URGENCY_PRESSURE"]
+    }
+  },
+  {
+    "id": "TC_ROMANCE_EMERGENCY",
+    "mode": "scam_check",
+    "input": "I love you and I am stuck overseas. Please send gift cards for my emergency travel.",
+    "expected": {
+      "min_risk_score": 60,
+      "must_detect": ["SCAM_ROMANCE_EMERGENCY"]
+    }
+  },
+  {
+    "id": "TC_FAKE_JOB_CHECK",
+    "mode": "offer_check",
+    "input": "You are hired without an interview. Deposit this check and send part back for equipment.",
+    "expected": {
+      "min_risk_score": 65,
+      "must_detect": ["SCAM_FAKE_JOB_CHECK_DEPOSIT"]
+    }
+  },
+  {
+    "id": "TC_MONEY_MULE_JOB",
+    "mode": "offer_check",
+    "input": "Work from home as a payment processor. Receive client funds and forward the balance to our partner wallet.",
+    "expected": {
+      "min_risk_score": 55,
+      "must_detect": ["SCAM_MONEY_MULE_JOB"]
+    }
+  },
+  {
+    "id": "TC_MARKETPLACE_BUYER",
+    "mode": "scam_check",
+    "input": "I will overpay for the item. Use my shipping agent and refund the extra payment.",
+    "expected": {
+      "min_risk_score": 55,
+      "must_detect": ["SCAM_FAKE_MARKETPLACE_BUYER"]
+    }
+  },
+  {
+    "id": "TC_MARKETPLACE_SELLER",
+    "mode": "offer_check",
+    "input": "The seller wants payment off-platform by wire transfer before showing proof of shipment.",
+    "expected": {
+      "min_risk_score": 45,
+      "must_detect": ["SCAM_OFF_PLATFORM_PAYMENT"]
+    }
+  },
+  {
+    "id": "TC_FAKE_RENTAL",
+    "mode": "offer_check",
+    "input": "The apartment is yours if you send a security deposit before viewing because I am out of town.",
+    "expected": {
+      "min_risk_score": 50,
+      "must_detect": ["SCAM_FAKE_RENTAL_OFFER"]
+    }
+  },
+  {
+    "id": "TC_PHISHING_SEED",
+    "mode": "scam_check",
+    "input": "Your wallet is suspended. Click this urgent link and enter your seed phrase.",
+    "expected": {
+      "risk_level": "critical",
+      "must_detect": ["SCAM_WALLET_SEED_PHRASE_THEFT"],
+      "must_include_red_flags": ["seed phrase"]
+    }
+  },
+  {
+    "id": "TC_FAKE_SUPPORT_REMOTE_ACCESS",
+    "mode": "scam_check",
+    "input": "This is support. Install remote access software so we can fix the suspicious transaction.",
+    "expected": {
+      "min_risk_score": 55,
+      "must_detect": ["SCAM_REMOTE_ACCESS"]
+    }
+  },
+  {
+    "id": "TC_ACCOUNT_VERIFICATION_FEE",
+    "mode": "scam_check",
+    "input": "Your account is restricted until you pay a refundable verification fee in crypto.",
+    "expected": {
+      "min_risk_score": 55,
+      "must_detect": ["SCAM_FAKE_ACCOUNT_VERIFICATION_FEE"]
+    }
+  },
+  {
+    "id": "TC_ADVANCE_FEE_FRAUD",
+    "mode": "offer_check",
+    "input": "The inheritance transfer is approved, but you must pay the release fee before funds arrive.",
+    "expected": {
+      "min_risk_score": 55,
+      "must_detect": ["SCAM_ADVANCE_FEE_FRAUD"]
+    }
+  },
+  {
+    "id": "TC_PRIZE_LOTTERY",
+    "mode": "offer_check",
+    "input": "Congratulations, you won a lottery prize. Pay processing fees before midnight.",
+    "expected": {
+      "min_risk_score": 55,
+      "must_detect": ["SCAM_FAKE_PRIZE_LOTTERY"]
+    }
+  },
+  {
+    "id": "TC_RECOVERY_SCAM",
+    "mode": "scam_check",
+    "input": "We recovered your crypto. Pay a small upfront fee today and your funds are guaranteed back.",
+    "expected": {
+      "risk_level": "critical",
+      "must_detect": ["SCAM_RECOVERY_SCAM"]
+    }
+  },
+  {
+    "id": "TC_FAKE_CHARITY",
+    "mode": "scam_check",
+    "input": "Please donate now to this disaster charity by gift card before the fundraiser closes.",
+    "expected": {
+      "min_risk_score": 50,
+      "must_detect": ["SCAM_FAKE_CHARITY_APPEAL"]
+    }
+  },
+  {
+    "id": "TC_FRIEND_IMPERSONATION",
+    "mode": "dialogue_check",
+    "input": "It is me from a new number. I need emergency money and cannot talk right now.",
+    "expected": {
+      "min_risk_score": 35,
+      "must_detect": ["SCAM_FRIEND_FAMILY_IMPERSONATION"]
+    }
+  },
+  {
+    "id": "TC_EXECUTIVE_IMPERSONATION",
+    "mode": "scam_check",
+    "input": "This is the CEO. Buy gift cards for a confidential client matter and send me the codes.",
+    "expected": {
+      "min_risk_score": 70,
+      "must_detect": ["SCAM_EXECUTIVE_IMPERSONATION"]
+    }
+  },
+  {
+    "id": "TC_INVOICE_FRAUD",
+    "mode": "offer_check",
+    "input": "Please pay the updated invoice to our new bank account details today.",
+    "expected": {
+      "min_risk_score": 45,
+      "must_detect": ["SCAM_INVOICE_FRAUD"]
+    }
+  },
+  {
+    "id": "TC_BEC",
+    "mode": "scam_check",
+    "input": "Use the new wire instructions for this vendor payment and keep the change confidential.",
+    "expected": {
+      "min_risk_score": 55,
+      "must_detect": ["SCAM_BUSINESS_EMAIL_COMPROMISE"]
+    }
+  },
+  {
+    "id": "TC_FAKE_ESCROW",
+    "mode": "offer_check",
+    "input": "Send the deposit to this escrow agent link before the seller releases the car.",
+    "expected": {
+      "min_risk_score": 50,
+      "must_detect": ["SCAM_FAKE_ESCROW"]
+    }
+  },
+  {
+    "id": "TC_DELIVERY_FEE",
+    "mode": "scam_check",
+    "input": "Your parcel is held. Pay this small delivery fee through the link to release it.",
+    "expected": {
+      "min_risk_score": 45,
+      "must_detect": ["SCAM_DELIVERY_FEE"]
+    }
+  },
+  {
+    "id": "TC_CUSTOMS_FEE",
+    "mode": "scam_check",
+    "input": "Customs requires an immediate clearance fee by prepaid card or the package will be destroyed.",
+    "expected": {
+      "min_risk_score": 55,
+      "must_detect": ["SCAM_CUSTOMS_FEE"]
+    }
+  },
+  {
+    "id": "TC_FAKE_LOAN",
+    "mode": "offer_check",
+    "input": "Your loan is approved. Pay the insurance fee first using a gift card.",
+    "expected": {
+      "min_risk_score": 60,
+      "must_detect": ["SCAM_FAKE_LOAN_OFFER"]
+    }
+  },
+  {
+    "id": "TC_FAKE_GRANT",
+    "mode": "offer_check",
+    "input": "You qualify for a government grant, but you must pay the activation fee now.",
+    "expected": {
+      "min_risk_score": 50,
+      "must_detect": ["SCAM_FAKE_GRANT"]
+    }
+  },
+  {
+    "id": "TC_IMMIGRATION_LEGAL",
+    "mode": "offer_check",
+    "input": "We guarantee visa approval if you pay the legal processing fee by wire today.",
+    "expected": {
+      "min_risk_score": 55,
+      "must_detect": ["SCAM_FAKE_IMMIGRATION_LEGAL_SERVICE"]
+    }
+  },
+  {
+    "id": "TC_INFLUENCER_COLLAB",
+    "mode": "offer_check",
+    "input": "A brand collaboration is ready. Pay the onboarding fee and share your login for verification.",
+    "expected": {
+      "min_risk_score": 50,
+      "must_detect": ["SCAM_FAKE_INFLUENCER_COLLABORATION"]
+    }
+  },
+  {
+    "id": "TC_SUBSCRIPTION_CANCEL",
+    "mode": "scam_check",
+    "input": "Your subscription renewal was charged. Click here to cancel and enter your card details.",
+    "expected": {
+      "min_risk_score": 50,
+      "must_detect": ["SCAM_SUBSCRIPTION_CANCELLATION_PHISHING"]
+    }
+  },
+  {
+    "id": "TC_REFUND_SCAM",
+    "mode": "dialogue_check",
+    "input": "We sent too much refund by mistake. Install the screen sharing app so we can reverse it.",
+    "expected": {
+      "min_risk_score": 55,
+      "must_detect": ["SCAM_REFUND_SCAM"]
+    }
+  },
+  {
+    "id": "TC_QR_PAYMENT",
+    "mode": "scam_check",
+    "input": "Scan this QR code to pay the invoice instead of using the usual company portal.",
+    "expected": {
+      "min_risk_score": 40,
+      "must_detect": ["SCAM_QR_CODE_PAYMENT"]
+    }
+  },
+  {
+    "id": "TC_FAKE_NFT_MINT",
+    "mode": "offer_check",
+    "input": "Connect your wallet for the exclusive NFT mint and approve the transaction now.",
+    "expected": {
+      "min_risk_score": 45,
+      "must_detect": ["SCAM_FAKE_NFT_MINT"]
+    }
+  },
+  {
+    "id": "TC_TOKEN_PRESALE",
+    "mode": "offer_check",
+    "input": "Join the private token presale with guaranteed allocation if you send crypto today.",
+    "expected": {
+      "min_risk_score": 55,
+      "must_detect": ["SCAM_FAKE_TOKEN_PRESALE"]
+    }
+  },
+  {
+    "id": "TC_FAKE_AIRDROP",
+    "mode": "scam_check",
+    "input": "Claim your airdrop by connecting your wallet and signing the approval message.",
+    "expected": {
+      "min_risk_score": 50,
+      "must_detect": ["SCAM_FAKE_AIRDROP"]
+    }
+  },
+  {
+    "id": "TC_BLACKMAIL",
+    "mode": "dialogue_check",
+    "input": "Pay in bitcoin or I will release private photos to everyone you know.",
+    "expected": {
+      "risk_level": "critical",
+      "must_detect": ["SCAM_BLACKMAIL_SEXTORTION", "MANIP_EMOTIONAL_BLACKMAIL"]
+    }
+  },
+  {
+    "id": "TC_DEBT_COLLECTION",
+    "mode": "scam_check",
+    "input": "This debt collector will send police unless you pay with prepaid cards today.",
+    "expected": {
+      "min_risk_score": 65,
+      "must_detect": ["SCAM_FAKE_DEBT_COLLECTION"]
+    }
+  },
+  {
+    "id": "TC_MEDICAL_EMERGENCY",
+    "mode": "scam_check",
+    "input": "Your cousin is in the hospital and needs emergency surgery money sent immediately.",
+    "expected": {
+      "min_risk_score": 45,
+      "must_detect": ["SCAM_FAKE_MEDICAL_EMERGENCY"]
+    }
+  },
+  {
+    "id": "TC_TRAVEL_BOOKING",
+    "mode": "offer_check",
+    "input": "This travel booking discount is available only if you pay outside the platform now.",
+    "expected": {
+      "min_risk_score": 45,
+      "must_detect": ["SCAM_FAKE_TRAVEL_BOOKING"]
+    }
+  },
+  {
+    "id": "TC_EVENT_TICKETS",
+    "mode": "offer_check",
+    "input": "I have last minute event tickets. Pay by friends and family transfer before I send them.",
+    "expected": {
+      "min_risk_score": 45,
+      "must_detect": ["SCAM_FAKE_EVENT_TICKETS"]
+    }
+  },
+  {
+    "id": "TC_TASK_SCAM",
+    "mode": "offer_check",
+    "input": "Complete simple app tasks for high commissions, but you must recharge your account to unlock withdrawals.",
+    "expected": {
+      "min_risk_score": 60,
+      "must_detect": ["SCAM_TASK_SCAM"]
+    }
+  },
+  {
+    "id": "TC_REVIEW_SCAM",
+    "mode": "offer_check",
+    "input": "Post paid reviews and buy the product first; we promise reimbursement after the review goes live.",
+    "expected": {
+      "min_risk_score": 45,
+      "must_detect": ["SCAM_REVIEW_SCAM"]
+    }
+  },
+  {
+    "id": "TC_ADMIN_IMPERSONATION",
+    "mode": "dialogue_check",
+    "input": "I am the Discord admin. Verify your wallet with this link or you will be removed.",
+    "expected": {
+      "min_risk_score": 55,
+      "must_detect": ["SCAM_TELEGRAM_DISCORD_ADMIN_IMPERSONATION"]
+    }
+  },
+  {
+    "id": "TC_SAFE_REPLY",
+    "mode": "safe_reply",
+    "input": "Send the deposit now and do not tell anyone. This deal expires in one hour.",
+    "expected": {
+      "min_risk_score": 55,
+      "must_detect": ["SCAM_SECRET_TIME_LIMITED_DEAL"],
+      "safe_reply_contains": "I am not comfortable"
+    }
+  },
+  {
+    "id": "TC_NORMAL_BUSINESS_LOW_RISK",
+    "mode": "offer_check",
+    "input": "Please review the attached proposal and let us know if you want to schedule a call next week.",
+    "expected": {
+      "risk_level": "low",
+      "max_risk_score": 20
+    }
+  },
+  {
+    "id": "TC_FALSE_POSITIVE_SECURITY_REMINDER",
+    "mode": "scam_check",
+    "input": "Please reset your password by visiting the official company portal you already use.",
+    "expected": {
+      "risk_level": "low",
+      "max_risk_score": 20
+    }
+  },
+  {
+    "id": "TC_MANIPULATION_WITHOUT_DIRECT_SCAM",
+    "mode": "manipulation_check",
+    "input": "After everything I did for you, refusing this proves you never cared about me.",
+    "expected": {
+      "min_risk_score": 35,
+      "must_detect": ["MANIP_GUILT_TRIPPING"]
+    }
+  }
+]
