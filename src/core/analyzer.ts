@@ -1,4 +1,4 @@
-import type { AnalyzeRequest } from "../schemas/analyze-request.js";
+import type { NormalizedAnalyzeRequest } from "../schemas/analyze-request.js";
 import type {
   AgentActionVerdict,
   AnalyzeResponse
@@ -10,7 +10,7 @@ import { scoreInput } from "./scoring.js";
 export const disclaimer =
   "BS Man Risk API analyzes communication risk signals only. It is not legal advice, financial advice, a lie detector, or a guarantee that something is true or false.";
 
-function inputTextFor(request: AnalyzeRequest): string {
+function inputTextFor(request: NormalizedAnalyzeRequest): string {
   const conversationText =
     request.conversation
       ?.map((message) => message.content)
@@ -18,7 +18,7 @@ function inputTextFor(request: AnalyzeRequest): string {
   return [request.input, conversationText].filter(Boolean).join("\n").trim();
 }
 
-function actionContextTextFor(request: AnalyzeRequest): string {
+function actionContextTextFor(request: NormalizedAnalyzeRequest): string {
   if (request.mode !== "agent_action_check") return "";
 
   return [
@@ -47,7 +47,7 @@ function summaryFor(score: number, patternCount: number): string {
   return "Low communication risk detected from the available text.";
 }
 
-function recommendedActionFor(request: AnalyzeRequest, score: number): string {
+function recommendedActionFor(request: NormalizedAnalyzeRequest, score: number): string {
   if (request.mode === "agent_action_check") {
     return "Use the verdict to decide whether the agent should proceed, pause, verify, require human review, or refuse.";
   }
@@ -79,7 +79,7 @@ function hasText(value: string | undefined, pattern: RegExp): boolean {
   return value !== undefined && pattern.test(value);
 }
 
-function agentActionRiskReasons(request: AnalyzeRequest, score: number): string[] {
+function agentActionRiskReasons(request: NormalizedAnalyzeRequest, score: number): string[] {
   const reasons: string[] = [];
   const action = request.proposed_action;
 
@@ -124,7 +124,7 @@ function agentActionRiskReasons(request: AnalyzeRequest, score: number): string[
   return [...new Set(reasons)];
 }
 
-function actionScoreAdjustment(request: AnalyzeRequest): number {
+function actionScoreAdjustment(request: NormalizedAnalyzeRequest): number {
   if (request.mode !== "agent_action_check") return 0;
 
   let adjustment = 0;
@@ -181,7 +181,7 @@ function nextBestActionFor(verdict: AgentActionVerdict): string {
   return "Proceed with the normal workflow.";
 }
 
-export function analyze(request: AnalyzeRequest): AnalyzeResponse {
+export function analyze(request: NormalizedAnalyzeRequest): AnalyzeResponse {
   const inputText = [inputTextFor(request), actionContextTextFor(request)]
     .filter(Boolean)
     .join("\n")

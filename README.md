@@ -185,6 +185,16 @@ curl -X POST http://localhost:3000/v1/analyze \
   -d '{"mode":"agent_action_check","language":"en","input":"This crypto investment guarantees 20% weekly returns. Send crypto today to secure your allocation.","proposed_action":"send_payment","asset":"USDC","amount":"100","recipient_type":"unknown_wallet","channel":"Telegram","verification_status":"unverified","sensitive_data_involved":false}'
 ```
 
+Agent-friendly object input is also supported:
+
+```bash
+curl -X POST http://localhost:3000/v1/analyze \
+  -H "content-type: application/json" \
+  -d '{"mode":"agent_action_check","language":"en","input":{"text":"This crypto investment guarantees 20% weekly returns. Send crypto today to secure your allocation.","conversation":[],"context":{"proposed_action":"send_payment","asset":"USDC","amount":"100","recipient_type":"unknown_wallet","channel":"Telegram","verification_status":"unverified","sensitive_data_involved":false}}}'
+```
+
+For compatibility, action context may be sent as top-level fields, inside top-level `context`, or inside `input.context`. If both top-level `context` and `input.context` are present, `input.context` takes priority.
+
 ## Error Format
 
 ```json
