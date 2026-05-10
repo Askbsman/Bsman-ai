@@ -1,6 +1,6 @@
 # x402 Implementation Plan
 
-Status: research plan only. x402 payment enforcement is not implemented in BS Man AI yet.
+Status: x402 Hono middleware is implemented behind `X402_ENABLED=true`. Keep it disabled by default unless testing x402 payment behavior.
 
 Research date: 2026-05-10
 
@@ -58,7 +58,13 @@ Likely testing/client packages:
 - `x402-fetch` or the current official client package recommended by x402 docs for retrying requests with payment proof.
 - CDP wallet/client tooling if using the Coinbase CDP buyer flow in integration tests.
 
-Do not install these packages in Stage 0.5. Stage 0.6 should install only the exact packages needed after confirming the current API from official docs and package versions.
+Installed packages:
+
+- `@x402/hono`
+- `@x402/core`
+- `@x402/evm`
+
+The implementation uses `paymentMiddleware`, `x402ResourceServer`, `HTTPFacilitatorClient`, and `ExactEvmScheme`.
 
 ## 4. Environment Variables
 
@@ -69,9 +75,8 @@ X402_ENABLED=false
 X402_NETWORK=base-sepolia
 X402_PAY_TO=
 X402_FACILITATOR_URL=
-X402_API_KEY=
 X402_PRICE_ANALYZE_USD=0.001
-X402_PRICE_ANALYZE_DEEP_USD=0.005
+X402_PRICE_AGENT_ACTION_USD=0.005
 ```
 
 Testnet-oriented keys:
@@ -81,14 +86,14 @@ Testnet-oriented keys:
 - `X402_PAY_TO`: receiving wallet address for testnet payments.
 - `X402_FACILITATOR_URL`: testnet facilitator URL, such as the x402.org testnet facilitator if still supported by current docs.
 - `X402_PRICE_ANALYZE_USD`: initial deterministic analyze price.
-- `X402_PRICE_ANALYZE_DEEP_USD`: future deep analyze price.
+- `X402_PRICE_AGENT_ACTION_USD`: future agent action pricing or split endpoint price.
 
 Production-only or production-sensitive keys:
 
 - `X402_PAY_TO`: production receiving wallet address.
 - `X402_NETWORK`: likely `base` or the current official Base mainnet network identifier.
 - `X402_FACILITATOR_URL`: production facilitator URL.
-- `X402_API_KEY`: required only if the chosen facilitator requires API authentication, such as a CDP facilitator setup.
+If a selected facilitator requires API authentication, add a deployment-only secret such as `X402_API_KEY`; do not commit it.
 
 No private keys should be added to `.env.example`, committed to the repository, or logged at runtime.
 
@@ -160,10 +165,10 @@ Current structure:
 
 Recommended Stage 0.6 design:
 
-1. Add `src/config/x402.ts` for environment parsing.
-2. Add `src/middleware/x402.ts` for optional payment middleware creation.
-3. In `src/routes/analyze.ts`, apply x402 middleware only to `POST /analyze` when `X402_ENABLED=true`.
-4. Leave `GET /`, `GET /health`, and `GET /docs/openapi.yaml` outside the middleware.
+1. `src/config/x402.ts` parses x402 environment variables.
+2. `src/middleware/x402.ts` creates the optional x402 middleware.
+3. `src/server.ts` mounts the middleware globally, but the route config protects only `POST /v1/analyze`.
+4. `GET /`, `GET /health`, and `GET /docs/openapi.yaml` remain free.
 
 Requirements:
 
@@ -177,13 +182,8 @@ Requirements:
 Pseudo-shape:
 
 ```ts
-const maybeX402 = createX402Middleware(x402Config);
-
-analyzeRoute.post(
-  "/analyze",
-  maybeX402,
-  analyzeHandler
-);
+app.use("*", createX402Middleware());
+app.route("/v1", analyzeRoute);
 ```
 
 If `X402_ENABLED=false`, `maybeX402` should be a no-op middleware.
@@ -236,12 +236,12 @@ Testnet-only checklist:
 
 - Reconfirm current official x402 Hono middleware docs.
 - Install required x402 packages.
-- Add `src/config/x402.ts`.
-- Add x402 middleware around `POST /v1/analyze`.
+- Added `src/config/x402.ts`.
+- Added x402 middleware around `POST /v1/analyze`.
 - Keep `GET /`, `GET /health`, and `GET /docs/openapi.yaml` free.
-- Add `.env.example` x402 keys without secrets.
-- Update OpenAPI with `402 Payment Required`.
-- Update README with exact x402 status and setup instructions.
-- Add tests for disabled mode, protected mode, and free endpoints.
+- Added `.env.example` x402 keys without secrets.
+- Updated OpenAPI with `402 Payment Required`.
+- Updated README with exact x402 status and setup instructions.
+- Added tests for disabled mode, protected mode, and free endpoints.
 - Verify with Base Sepolia testnet.
 - Do not deploy mainnet until testnet works end to end.

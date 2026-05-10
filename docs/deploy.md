@@ -27,6 +27,12 @@ See `.env.example`.
 ```bash
 PORT=3000
 NODE_ENV=development
+X402_ENABLED=false
+X402_NETWORK=base-sepolia
+X402_PAY_TO=
+X402_FACILITATOR_URL=
+X402_PRICE_ANALYZE_USD=0.001
+X402_PRICE_AGENT_ACTION_USD=0.005
 ```
 
 ## Build
@@ -67,5 +73,5 @@ Cloudflare Workers may be a good future target, but the Hono runtime entrypoint 
 
 - No database is required for v0.1.
 - No AI provider keys are required.
-- No x402 payment secrets are required yet because payment enforcement is not implemented.
+- x402 payment enforcement is disabled by default. Set `X402_ENABLED=true` only after configuring testnet payment variables.
 - Keep `docs/openapi.yaml` available with the deployed app if using `GET /docs/openapi.yaml`.

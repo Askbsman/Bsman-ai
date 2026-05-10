@@ -9,7 +9,7 @@ It is built for agent workflows that need a structured communication-risk check 
 ## Status
 
 - API MVP: ready
-- x402 payments: planned
+- x402 payments: implemented behind `X402_ENABLED=true`
 - English-only v0.1: yes
 - AI provider integration: not yet
 - Database: not required for v0.1
@@ -55,6 +55,7 @@ POST /v1/analyze
 - `offer_check`: job, investment, marketplace, rental, loan, business, and commercial offer risks
 - `manipulation_check`: urgency, guilt, shame, fear, authority, secrecy, isolation, gaslighting, and pressure tactics
 - `safe_reply`: calm boundary-setting reply with optional tone
+- `agent_action_check`: verdict for whether an AI agent should proceed, pause, verify, require human review, or refuse
 
 Safe reply tones:
 
@@ -127,6 +128,13 @@ Risk levels:
 
 Each detected pattern includes `confidence` from 0 to 1 and a short `evidence_snippet`.
 
+`agent_action_check` also returns:
+
+- `verdict`: `proceed`, `proceed_with_caution`, `pause_and_verify`, `require_human_review`, or `do_not_proceed`
+- `requires_human_review`: boolean
+- `next_best_action`: recommended operational next step
+- `action_risk_reasons`: action-specific risk reasons
+
 ## Curl Examples
 
 ### scam_check
@@ -167,6 +175,14 @@ curl -X POST http://localhost:3000/v1/analyze \
 curl -X POST http://localhost:3000/v1/analyze \
   -H "content-type: application/json" \
   -d '{"mode":"safe_reply","language":"en","input":"Send the deposit now and do not tell anyone. This deal expires in one hour.","options":{"tone":"calm_firm"}}'
+```
+
+### agent_action_check
+
+```bash
+curl -X POST http://localhost:3000/v1/analyze \
+  -H "content-type: application/json" \
+  -d '{"mode":"agent_action_check","language":"en","input":"This crypto investment guarantees 20% weekly returns. Send crypto today to secure your allocation.","proposed_action":"send_payment","asset":"USDC","amount":"100","recipient_type":"unknown_wallet","channel":"Telegram","verification_status":"unverified","sensitive_data_involved":false}'
 ```
 
 ## Error Format
@@ -229,17 +245,23 @@ Start compiled server:
 npm start
 ```
 
-## x402 Readiness
+## x402 Payments
 
-This repository is prepared for x402/Bazaar MVP review through metadata, pricing notes, OpenAPI docs, health checks, and clear endpoint boundaries.
+This repository includes x402 middleware wiring for the paid analyze endpoint. It is disabled by default.
 
-x402 payments are **not implemented yet**. The intended future paid endpoint is:
+Default:
+
+```bash
+X402_ENABLED=false
+```
+
+When `X402_ENABLED=true`, the paid endpoint is:
 
 ```text
 POST /v1/analyze
 ```
 
-Free discovery endpoints should remain:
+Free discovery endpoints remain:
 
 ```text
 GET /
@@ -247,7 +269,22 @@ GET /health
 GET /docs/openapi.yaml
 ```
 
-See [docs/x402-integration-notes.md](docs/x402-integration-notes.md) and [docs/pricing.md](docs/pricing.md).
+Required x402 setup for testnet:
+
+```bash
+X402_ENABLED=true
+X402_NETWORK=base-sepolia
+X402_PAY_TO=0xYourReceivingAddress
+X402_FACILITATOR_URL=https://facilitator.x402.org
+X402_PRICE_ANALYZE_USD=0.001
+X402_PRICE_AGENT_ACTION_USD=0.005
+```
+
+`base-sepolia` maps to `eip155:84532`. `base` maps to `eip155:8453`.
+
+Never commit payment keys, facilitator API keys, private wallet keys, or seed phrases. Verify on Base Sepolia before any mainnet deployment.
+
+See [docs/x402-setup.md](docs/x402-setup.md), [docs/x402-integration-notes.md](docs/x402-integration-notes.md), and [docs/pricing.md](docs/pricing.md).
 
 ## Documentation
 
@@ -257,12 +294,13 @@ See [docs/x402-integration-notes.md](docs/x402-integration-notes.md) and [docs/p
 - Pricing draft: [docs/pricing.md](docs/pricing.md)
 - Deployment: [docs/deploy.md](docs/deploy.md)
 - x402 notes: [docs/x402-integration-notes.md](docs/x402-integration-notes.md)
+- x402 setup: [docs/x402-setup.md](docs/x402-setup.md)
 - OpenAPI: [docs/openapi.yaml](docs/openapi.yaml)
 - Bazaar metadata: [docs/bazaar-metadata.json](docs/bazaar-metadata.json)
 
 ## Roadmap
 
-- Add x402 payment enforcement for `POST /v1/analyze`
+- Verify x402 payment enforcement on Base Sepolia
 - Expand scam and manipulation datasets
 - Add more locale-aware English variants
 - Add optional AI-assisted analysis after deterministic MVP validation

@@ -1,7 +1,7 @@
 {
   "name": "BS Man AI",
   "short_description": "Conversation Risk Intelligence API for AI agents.",
-  "description": "BS Man AI analyzes English messages, offers, and dialogues for scam signals, manipulation tactics, unrealistic promises, pressure patterns, and unsafe next-step recommendations. It is built as an x402-ready MVP for agent workflows, but x402 payment enforcement is not implemented yet.",
+  "description": "BS Man AI analyzes English messages, offers, and dialogues for scam signals, manipulation tactics, unrealistic promises, pressure patterns, and unsafe next-step recommendations. It includes x402 middleware for POST /v1/analyze when X402_ENABLED=true, with discovery and health endpoints kept free.",
   "category": "security",
   "tags": [
     "x402",
@@ -20,7 +20,8 @@
     "dialogue_check",
     "offer_check",
     "manipulation_check",
-    "safe_reply"
+    "safe_reply",
+    "agent_action_check"
   ],
   "endpoints": {
     "health": {
@@ -41,7 +42,7 @@
     "analyze": {
       "method": "POST",
       "path": "/v1/analyze",
-      "paid": "planned"
+      "paid": "when X402_ENABLED=true"
     }
   },
   "pricing_draft": {
@@ -77,7 +78,8 @@
     "Scam and phishing risk review for user-submitted messages.",
     "Manipulation and pressure-pattern detection in dialogue.",
     "Offer risk review for jobs, rentals, investments, marketplace deals, and loans.",
-    "Safe reply generation that sets a verification boundary."
+    "Safe reply generation that sets a verification boundary.",
+    "Agent action preflight checks for payment, wallet, credential, link, file, and external-tool actions."
   ],
   "input_schema_ref": "docs/openapi.yaml#/components/schemas/AnalyzeRequest",
   "output_schema_ref": "docs/openapi.yaml#/components/schemas/AnalyzeResponse",

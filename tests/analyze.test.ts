@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import app from "../src/server.js";
+import app, { createApp } from "../src/server.js";
 import cases from "./fixtures/test-cases.json" with { type: "json" };
 
 const modes = [
@@ -7,7 +7,8 @@ const modes = [
   "dialogue_check",
   "offer_check",
   "manipulation_check",
-  "safe_reply"
+  "safe_reply",
+  "agent_action_check"
 ] as const;
 
 const disclaimer =
@@ -92,6 +93,72 @@ describe("service endpoints", () => {
   });
 });
 
+describe("x402 endpoint policy", () => {
+  test("X402 disabled keeps POST /v1/analyze behavior unchanged", async () => {
+    const x402DisabledApp = createApp();
+    const response = await x402DisabledApp.request("/v1/analyze", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        mode: "scam_check",
+        input: "Your wallet is suspended. Click this urgent link and enter your seed phrase."
+      })
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.risk_level).toBe("critical");
+  });
+
+  test("x402 protection can require payment for POST /v1/analyze only", async () => {
+    const protectedApp = createApp({
+      x402Middleware: async (c, next) => {
+        if (c.req.method === "POST" && c.req.path === "/v1/analyze") {
+          return c.json(
+            {
+              error: {
+                code: "PAYMENT_REQUIRED",
+                message: "x402 payment required.",
+                details: {
+                  accepts: [
+                    {
+                      scheme: "exact",
+                      network: "eip155:84532",
+                      price: "$0.001"
+                    }
+                  ]
+                }
+              }
+            },
+            402
+          );
+        }
+
+        await next();
+      }
+    });
+
+    const rootResponse = await protectedApp.request("/");
+    const healthResponse = await protectedApp.request("/health");
+    const docsResponse = await protectedApp.request("/docs/openapi.yaml");
+    const analyzeResponse = await protectedApp.request("/v1/analyze", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        mode: "scam_check",
+        input: "Your wallet is suspended. Click this urgent link and enter your seed phrase."
+      })
+    });
+    const analyzeBody = await analyzeResponse.json();
+
+    expect(rootResponse.status).toBe(200);
+    expect(healthResponse.status).toBe(200);
+    expect(docsResponse.status).toBe(200);
+    expect(analyzeResponse.status).toBe(402);
+    expect(analyzeBody.error.code).toBe("PAYMENT_REQUIRED");
+  });
+});
+
 describe("POST /v1/analyze", () => {
   test.each(modes)("returns structured analysis for %s", async (mode) => {
     const response = await analyze({
@@ -122,6 +189,43 @@ describe("POST /v1/analyze", () => {
     expect(body.safe_reply === null || typeof body.safe_reply === "string").toBe(
       true
     );
+    if (mode === "agent_action_check") {
+      expect([
+        "proceed",
+        "proceed_with_caution",
+        "pause_and_verify",
+        "require_human_review",
+        "do_not_proceed"
+      ]).toContain(body.verdict);
+      expect(typeof body.requires_human_review).toBe("boolean");
+      expect(typeof body.next_best_action).toBe("string");
+      expect(Array.isArray(body.action_risk_reasons)).toBe(true);
+    }
+  });
+
+  test("keeps existing modes backward compatible without action verdict fields", async () => {
+    for (const mode of modes.filter((mode) => mode !== "agent_action_check")) {
+      const response = await analyze({
+        mode,
+        input: "Please review this message and verify details before acting."
+      });
+      const body = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(body).toHaveProperty("mode", mode);
+      expect(body).toHaveProperty("risk_score");
+      expect(body).toHaveProperty("risk_level");
+      expect(body).toHaveProperty("summary");
+      expect(body).toHaveProperty("detected_patterns");
+      expect(body).toHaveProperty("red_flags");
+      expect(body).toHaveProperty("recommended_action");
+      expect(body).toHaveProperty("safe_reply");
+      expect(body).toHaveProperty("disclaimer");
+      expect(body.verdict).toBeUndefined();
+      expect(body.requires_human_review).toBeUndefined();
+      expect(body.next_best_action).toBeUndefined();
+      expect(body.action_risk_reasons).toBeUndefined();
+    }
   });
 
   test("generates a safe reply only for safe_reply mode", async () => {
@@ -242,6 +346,146 @@ describe("POST /v1/analyze", () => {
 
     expect(response.status).toBe(200);
     expect(["high", "critical"]).toContain(body.risk_level);
+  });
+
+  test.each([
+    [
+      "send_payment to unknown wallet after crypto offer",
+      {
+        mode: "agent_action_check",
+        input:
+          "This crypto investment guarantees 20% weekly returns. Send crypto today to secure your allocation.",
+        proposed_action: "send_payment",
+        asset: "USDC",
+        amount: "100",
+        recipient_type: "unknown_wallet",
+        channel: "Telegram",
+        verification_status: "unverified",
+        sensitive_data_involved: false
+      },
+      "critical",
+      "do_not_proceed"
+    ],
+    [
+      "share_seed_phrase",
+      {
+        mode: "agent_action_check",
+        input: "Support says the wallet is suspended and needs the recovery phrase.",
+        proposed_action: "share_seed_phrase",
+        asset: "wallet",
+        recipient_type: "support_agent",
+        channel: "web_chat",
+        verification_status: "unverified",
+        sensitive_data_involved: true
+      },
+      "critical",
+      "do_not_proceed"
+    ],
+    [
+      "suspicious fake support link",
+      {
+        mode: "agent_action_check",
+        input: "This is support. Click this urgent link to verify your account.",
+        proposed_action: "click_link",
+        recipient_type: "support_agent",
+        channel: "email",
+        verification_status: "unverified",
+        sensitive_data_involved: true
+      },
+      /high|critical/,
+      /pause_and_verify|require_human_review|do_not_proceed/
+    ],
+    [
+      "normal verified SaaS invoice",
+      {
+        mode: "agent_action_check",
+        input:
+          "Invoice INV-2041 from Northstar Labs LLC is due June 30. Please pay through the company portal listed in our contract.",
+        proposed_action: "send_payment",
+        asset: "USD",
+        amount: "49",
+        recipient_type: "known_vendor",
+        channel: "company_portal",
+        verification_status: "verified",
+        sensitive_data_involved: false
+      },
+      /low|medium/,
+      /proceed|proceed_with_caution/
+    ],
+    [
+      "normal job interview scheduling",
+      {
+        mode: "agent_action_check",
+        input:
+          "Thanks for applying. Are you available for a video interview next week? No payment or personal banking details are needed.",
+        proposed_action: "call_external_tool",
+        recipient_type: "known_company",
+        channel: "email",
+        verification_status: "verified",
+        sensitive_data_involved: false
+      },
+      "low",
+      "proceed"
+    ],
+    [
+      "marketplace off-platform payment",
+      {
+        mode: "agent_action_check",
+        input: "The seller wants payment off-platform by wire transfer before showing proof of shipment.",
+        proposed_action: "send_payment",
+        asset: "USD",
+        amount: "800",
+        recipient_type: "marketplace_seller",
+        channel: "marketplace_chat",
+        verification_status: "unverified",
+        sensitive_data_involved: false
+      },
+      /high|critical/,
+      /require_human_review|do_not_proceed/
+    ],
+    [
+      "unverified Telegram admin wallet connection",
+      {
+        mode: "agent_action_check",
+        input: "I am the Telegram admin. Verify your wallet with this link or you will be removed.",
+        proposed_action: "connect_wallet",
+        asset: "wallet",
+        recipient_type: "telegram_admin",
+        channel: "Telegram",
+        verification_status: "unverified",
+        sensitive_data_involved: true
+      },
+      "critical",
+      "do_not_proceed"
+    ],
+    [
+      "risky text without action context",
+      {
+        mode: "agent_action_check",
+        input: "Your wallet is suspended. Click this urgent link and enter your seed phrase."
+      },
+      /high|critical/,
+      /pause_and_verify|require_human_review|do_not_proceed/
+    ]
+  ])("%s returns agent action verdict", async (_name, payload, riskLevel, verdict) => {
+    const response = await analyze(payload);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    if (typeof riskLevel === "string") {
+      expect(body.risk_level).toBe(riskLevel);
+    } else {
+      expect(body.risk_level).toMatch(riskLevel);
+    }
+    if (typeof verdict === "string") {
+      expect(body.verdict).toBe(verdict);
+    } else {
+      expect(body.verdict).toMatch(verdict);
+    }
+    expect(typeof body.requires_human_review).toBe("boolean");
+    expect(typeof body.next_best_action).toBe("string");
+    expect(Array.isArray(body.action_risk_reasons)).toBe(true);
+    expect(body.action_risk_reasons.length).toBeGreaterThan(0);
   });
 
   test("rejects invalid mode with a validation error", async () => {
