@@ -8,7 +8,8 @@
     "dev": "tsx watch src/server.ts",
     "start": "node dist/server.js",
     "build": "tsc",
-    "test": "vitest run"
+    "test": "vitest run",
+    "agentcash:check": "node scripts/agentcash-check.mjs"
   },
   "keywords": [
     "x402",
