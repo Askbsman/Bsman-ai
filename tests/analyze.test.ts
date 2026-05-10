@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import app, { createApp } from "../src/server.js";
 import type { X402Config } from "../src/config/x402.js";
+import { createX402Middleware } from "../src/middleware/x402.js";
 import cases from "./fixtures/test-cases.json" with { type: "json" };
 
 const modes = [
@@ -299,6 +300,124 @@ describe("x402 endpoint policy", () => {
         "X402_PRICE_AGENT_ACTION_USD"
       ])
     );
+    expectSafeError(body);
+  });
+
+  test("enabled x402 initializes the payment middleware once before paid requests", async () => {
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    let initializeCalls = 0;
+    let handlerCalls = 0;
+    const initializedApp = createApp({
+      x402Middleware: createX402Middleware(validX402Config, {
+        createProtectedMiddleware: () => ({
+          initialize: async () => {
+            initializeCalls += 1;
+          },
+          handler: async (c) => {
+            handlerCalls += 1;
+            return c.json(
+              {
+                error: {
+                  code: "PAYMENT_REQUIRED",
+                  message: "x402 payment required.",
+                  details: []
+                }
+              },
+              402
+            );
+          }
+        })
+      })
+    });
+
+    const firstResponse = await initializedApp.request("/v1/analyze", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ mode: "scam_check", input: "Send crypto today." })
+    });
+    const secondResponse = await initializedApp.request("/v1/analyze", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ mode: "scam_check", input: "Send crypto today." })
+    });
+
+    infoSpy.mockRestore();
+    warnSpy.mockRestore();
+    expect(firstResponse.status).toBe(402);
+    expect(secondResponse.status).toBe(402);
+    expect(initializeCalls).toBe(1);
+    expect(handlerCalls).toBe(2);
+  });
+
+  test("enabled x402 does not initialize payment middleware for free endpoints", async () => {
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    let initializeCalls = 0;
+    const initializedApp = createApp({
+      x402Middleware: createX402Middleware(validX402Config, {
+        createProtectedMiddleware: () => ({
+          initialize: async () => {
+            initializeCalls += 1;
+          },
+          handler: async (c) => c.json({}, 402)
+        })
+      })
+    });
+
+    const rootResponse = await initializedApp.request("/");
+    const healthResponse = await initializedApp.request("/health");
+    const docsResponse = await initializedApp.request("/docs/openapi.yaml");
+
+    infoSpy.mockRestore();
+    warnSpy.mockRestore();
+    expect(rootResponse.status).toBe(200);
+    expect(healthResponse.status).toBe(200);
+    expect(docsResponse.status).toBe(200);
+    expect(initializeCalls).toBe(0);
+  });
+
+  test("x402 initialization failure returns a safe runtime error", async () => {
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    let handlerCalls = 0;
+    const failingApp = createApp({
+      x402Middleware: createX402Middleware(validX402Config, {
+        createProtectedMiddleware: () => ({
+          initialize: async () => {
+            throw new Error(
+              "Facilitator does not support exact on eip155:84532. Make sure to call initialize()."
+            );
+          },
+          handler: async (c) => {
+            handlerCalls += 1;
+            return c.json({}, 402);
+          }
+        })
+      })
+    });
+
+    const response = await failingApp.request("/v1/analyze", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ mode: "scam_check", input: "Send crypto today." })
+    });
+    const body = await response.json();
+
+    infoSpy.mockRestore();
+    warnSpy.mockRestore();
+    expect(response.status).toBe(500);
+    expect(body).toEqual({
+      error: {
+        code: "X402_RUNTIME_ERROR",
+        message:
+          "x402 payment middleware failed before completing the payment challenge.",
+        details: {
+          hint: "Check x402 network, facilitator URL, and pay-to address configuration."
+        }
+      }
+    });
+    expect(handlerCalls).toBe(0);
     expectSafeError(body);
   });
 });
