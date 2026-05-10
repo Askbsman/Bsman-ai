@@ -195,10 +195,32 @@ components:
         sensitive_data_involved:
           type: boolean
         input:
-          type: string
-          minLength: 1
-          maxLength: 12000
-          description: English text to analyze.
+          oneOf:
+            - type: string
+              minLength: 1
+              maxLength: 12000
+            - type: object
+              properties:
+                text:
+                  type: string
+                  minLength: 1
+                  maxLength: 12000
+                conversation:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - content
+                    properties:
+                      role:
+                        type: string
+                      content:
+                        type: string
+                context:
+                  $ref: "#/components/schemas/AgentActionContext"
+          description: Either English text or an agent-friendly object with text, conversation, and context.
+        context:
+          $ref: "#/components/schemas/AgentActionContext"
         conversation:
           type: array
           description: Optional multi-message conversation. When present, all message content is analyzed together.
@@ -351,3 +373,33 @@ components:
                 - type: array
                   items: {}
                 - type: object
+    AgentActionContext:
+      type: object
+      properties:
+        proposed_action:
+          type: string
+          enum:
+            - send_payment
+            - share_credentials
+            - share_seed_phrase
+            - connect_wallet
+            - sign_transaction
+            - click_link
+            - download_file
+            - share_sensitive_data
+            - approve_transfer
+            - call_external_tool
+        asset:
+          type: string
+        amount:
+          oneOf:
+            - type: string
+            - type: number
+        recipient_type:
+          type: string
+        channel:
+          type: string
+        verification_status:
+          type: string
+        sensitive_data_involved:
+          type: boolean

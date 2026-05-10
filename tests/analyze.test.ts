@@ -488,6 +488,89 @@ describe("POST /v1/analyze", () => {
     expect(body.action_risk_reasons.length).toBeGreaterThan(0);
   });
 
+  test("supports existing string input with nested context", async () => {
+    const response = await analyze({
+      mode: "agent_action_check",
+      input:
+        "This crypto investment guarantees 20% weekly returns. Send crypto today to secure your allocation.",
+      context: {
+        proposed_action: "send_payment",
+        asset: "USDC",
+        amount: "100",
+        recipient_type: "unknown_wallet",
+        channel: "Telegram",
+        verification_status: "unverified",
+        sensitive_data_involved: false
+      }
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.risk_level).toBe("critical");
+    expect(body.verdict).toBe("do_not_proceed");
+    expect(body.requires_human_review).toBe(true);
+  });
+
+  test("supports agent-friendly object input with text, conversation, and context", async () => {
+    const response = await analyze({
+      mode: "agent_action_check",
+      input: {
+        text: "Support says the wallet is suspended.",
+        conversation: [
+          {
+            role: "counterparty",
+            content: "Click this urgent link and enter your seed phrase."
+          }
+        ],
+        context: {
+          proposed_action: "share_seed_phrase",
+          asset: "wallet",
+          recipient_type: "support_agent",
+          channel: "web_chat",
+          verification_status: "unverified",
+          sensitive_data_involved: true
+        }
+      }
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.risk_level).toBe("critical");
+    expect(body.verdict).toBe("do_not_proceed");
+    expect(
+      body.detected_patterns.map((pattern: { id: string }) => pattern.id)
+    ).toContain("SCAM_WALLET_SEED_PHRASE_THEFT");
+  });
+
+  test("input.context takes priority over top-level context", async () => {
+    const response = await analyze({
+      mode: "agent_action_check",
+      input: {
+        text: "Please pay the invoice through the company portal listed in our contract.",
+        context: {
+          proposed_action: "send_payment",
+          recipient_type: "known_vendor",
+          channel: "company_portal",
+          verification_status: "verified",
+          sensitive_data_involved: false
+        }
+      },
+      context: {
+        proposed_action: "share_seed_phrase",
+        recipient_type: "unknown_wallet",
+        channel: "Telegram",
+        verification_status: "unverified",
+        sensitive_data_involved: true
+      }
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(["low", "medium"]).toContain(body.risk_level);
+    expect(["proceed", "proceed_with_caution"]).toContain(body.verdict);
+    expect(body.action_risk_reasons.join(" ")).not.toContain("seed phrase");
+  });
+
   test("rejects invalid mode with a validation error", async () => {
     const response = await analyze({ mode: "truth_check", input: "hello" });
     const body = await response.json();
