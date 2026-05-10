@@ -2,6 +2,18 @@
 
 This is pricing guidance for the x402 MVP. x402 middleware is implemented behind `X402_ENABLED=true`; local and test runs should keep it disabled unless payment behavior is being tested.
 
+Primary paid endpoint:
+
+```text
+POST https://api.callbsman.com/v1/analyze
+```
+
+Fallback infrastructure endpoint:
+
+```text
+POST https://bsman-ai.onrender.com/v1/analyze
+```
+
 ## Option A
 
 - `$0.001` per `POST /v1/analyze` request

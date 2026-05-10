@@ -8,15 +8,23 @@ Do not run paid commands unless you understand the endpoint, network, asset, and
 
 ## Successful Command Format
 
+Check the endpoint payment requirements:
+
 ```bash
-npx agentcash@latest fetch https://bsman-ai.onrender.com/v1/analyze \
+npx agentcash@latest check https://api.callbsman.com/v1/analyze
+```
+
+Run the paid fetch when your AgentCash wallet is ready:
+
+```bash
+npx agentcash@latest fetch https://api.callbsman.com/v1/analyze \
   -m POST \
   -b '{"mode":"agent_action_check","input":"A Telegram admin says I must connect my wallet to verify or lose access.","context":{"proposed_action":"connect_wallet","asset":"wallet","recipient_type":"telegram_admin","channel":"Telegram","verification_status":"unverified","sensitive_data_involved":true},"language":"en","locale":"US"}'
 ```
 
 Payment details:
 
-- Endpoint: `https://bsman-ai.onrender.com/v1/analyze`
+- Endpoint: `https://api.callbsman.com/v1/analyze`
 - Network: Base mainnet
 - Asset: USDC
 - Price: `$0.001`

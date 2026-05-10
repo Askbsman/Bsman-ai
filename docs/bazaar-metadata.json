@@ -24,24 +24,30 @@
     "agent_action_check"
   ],
   "endpoints": {
+    "base_url": "https://api.callbsman.com",
+    "fallback_base_url": "https://bsman-ai.onrender.com",
     "health": {
       "method": "GET",
       "path": "/health",
+      "url": "https://api.callbsman.com/health",
       "paid": false
     },
     "metadata": {
       "method": "GET",
       "path": "/",
+      "url": "https://api.callbsman.com/",
       "paid": false
     },
     "openapi": {
       "method": "GET",
       "path": "/docs/openapi.yaml",
+      "url": "https://api.callbsman.com/docs/openapi.yaml",
       "paid": false
     },
     "analyze": {
       "method": "POST",
       "path": "/v1/analyze",
+      "url": "https://api.callbsman.com/v1/analyze",
       "paid": "when X402_ENABLED=true"
     }
   },

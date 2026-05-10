@@ -49,6 +49,22 @@ npm start
 
 The start command runs the compiled Node.js server from `dist/server.js`.
 
+## Public Domains
+
+Primary API endpoint:
+
+```text
+https://api.callbsman.com
+```
+
+Fallback Render endpoint:
+
+```text
+https://bsman-ai.onrender.com
+```
+
+Render remains the infrastructure host. Public docs and client examples should prefer the custom domain.
+
 ## Docker Plan
 
 Docker is not included yet. A future Dockerfile should:

@@ -10,6 +10,26 @@ X402_ENABLED=false
 
 With the default value, `POST /v1/analyze` behaves exactly like the local deterministic API and does not require payment.
 
+## Public Domains
+
+Primary API endpoint:
+
+```text
+https://api.callbsman.com
+```
+
+Fallback Render endpoint:
+
+```text
+https://bsman-ai.onrender.com
+```
+
+Primary paid analyze endpoint:
+
+```text
+POST https://api.callbsman.com/v1/analyze
+```
+
 ## Endpoint Policy
 
 Free endpoints:

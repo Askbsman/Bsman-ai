@@ -4,7 +4,12 @@ info:
   version: 0.1.0
   description: Conversation Risk Intelligence API for AI agents.
 servers:
+  - url: https://api.callbsman.com
+    description: Primary production API
+  - url: https://bsman-ai.onrender.com
+    description: Render fallback endpoint
   - url: http://localhost:3000
+    description: Local development
 paths:
   /:
     get:

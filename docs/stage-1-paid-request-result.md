@@ -1,4 +1,4 @@
-# Stage 1.0 — x402 Paid Request Result
+﻿# Stage 1.0 вЂ” x402 Paid Request Result
 
 ## Summary
 
@@ -6,7 +6,7 @@ BS Man AI successfully completed an end-to-end paid x402 request on Base mainnet
 
 ## Endpoint
 
-POST https://bsman-ai.onrender.com/v1/analyze
+POST https://api.callbsman.com/v1/analyzenFallback endpoint: https://bsman-ai.onrender.com/v1/analyze
 
 ## Tested mode
 
@@ -62,3 +62,4 @@ The API supports:
 - AgentCash buyer flow
 - paid request completion
 - structured risk intelligence response
+

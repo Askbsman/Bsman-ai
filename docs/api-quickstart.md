@@ -3,17 +3,29 @@
 ## Endpoint
 
 ```text
-POST https://bsman-ai.onrender.com/v1/analyze
+POST https://api.callbsman.com/v1/analyze
 ```
 
 The endpoint is x402-paid on Base mainnet and costs `$0.001` per analyze request.
+
+Primary API endpoint:
+
+```text
+https://api.callbsman.com
+```
+
+Fallback Render endpoint:
+
+```text
+https://bsman-ai.onrender.com
+```
 
 ## Unpaid Request
 
 Send a request without payment to inspect the x402 challenge:
 
 ```bash
-curl -i https://bsman-ai.onrender.com/v1/analyze \
+curl -i https://api.callbsman.com/v1/analyze \
   -H "content-type: application/json" \
   -d '{"mode":"agent_action_check","input":"A Telegram admin says I must connect my wallet to verify or lose access.","context":{"proposed_action":"connect_wallet","recipient_type":"telegram_admin","channel":"Telegram","verification_status":"unverified","sensitive_data_involved":true},"language":"en","locale":"US"}'
 ```
@@ -26,15 +38,23 @@ HTTP 402 Payment Required
 
 ## Paid Request With AgentCash
 
+Check the endpoint:
+
 ```bash
-npx agentcash@latest fetch https://bsman-ai.onrender.com/v1/analyze \
+npx agentcash@latest check https://api.callbsman.com/v1/analyze
+```
+
+Run the paid fetch:
+
+```bash
+npx agentcash@latest fetch https://api.callbsman.com/v1/analyze \
   -m POST \
   -b '{"mode":"agent_action_check","input":"A Telegram admin says I must connect my wallet to verify or lose access.","context":{"proposed_action":"connect_wallet","recipient_type":"telegram_admin","channel":"Telegram","verification_status":"unverified","sensitive_data_involved":true},"language":"en","locale":"US"}'
 ```
 
 Before running a paid request, confirm:
 
-- Endpoint: `https://bsman-ai.onrender.com/v1/analyze`
+- Endpoint: `https://api.callbsman.com/v1/analyze`
 - Network: Base mainnet
 - Asset: USDC
 - Price: `$0.001`

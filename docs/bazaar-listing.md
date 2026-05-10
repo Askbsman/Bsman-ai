@@ -34,15 +34,15 @@ Security / AI agents / Risk intelligence
 ## Endpoint
 
 ```text
-POST https://bsman-ai.onrender.com/v1/analyze
+POST https://api.callbsman.com/v1/analyze
 ```
 
 Free discovery endpoints:
 
 ```text
-GET https://bsman-ai.onrender.com/
-GET https://bsman-ai.onrender.com/health
-GET https://bsman-ai.onrender.com/docs/openapi.yaml
+GET https://api.callbsman.com/
+GET https://api.callbsman.com/health
+GET https://api.callbsman.com/docs/openapi.yaml
 ```
 
 ## Payment Network
