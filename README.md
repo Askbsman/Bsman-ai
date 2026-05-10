@@ -55,6 +55,7 @@ POST /v1/analyze
 - `offer_check`: job, investment, marketplace, rental, loan, business, and commercial offer risks
 - `manipulation_check`: urgency, guilt, shame, fear, authority, secrecy, isolation, gaslighting, and pressure tactics
 - `safe_reply`: calm boundary-setting reply with optional tone
+- `agent_action_check`: verdict for whether an AI agent should proceed, pause, verify, require human review, or refuse
 
 Safe reply tones:
 
@@ -127,6 +128,13 @@ Risk levels:
 
 Each detected pattern includes `confidence` from 0 to 1 and a short `evidence_snippet`.
 
+`agent_action_check` also returns:
+
+- `verdict`: `proceed`, `proceed_with_caution`, `pause_and_verify`, `require_human_review`, or `do_not_proceed`
+- `requires_human_review`: boolean
+- `next_best_action`: recommended operational next step
+- `action_risk_reasons`: action-specific risk reasons
+
 ## Curl Examples
 
 ### scam_check
@@ -167,6 +175,14 @@ curl -X POST http://localhost:3000/v1/analyze \
 curl -X POST http://localhost:3000/v1/analyze \
   -H "content-type: application/json" \
   -d '{"mode":"safe_reply","language":"en","input":"Send the deposit now and do not tell anyone. This deal expires in one hour.","options":{"tone":"calm_firm"}}'
+```
+
+### agent_action_check
+
+```bash
+curl -X POST http://localhost:3000/v1/analyze \
+  -H "content-type: application/json" \
+  -d '{"mode":"agent_action_check","language":"en","input":"This crypto investment guarantees 20% weekly returns. Send crypto today to secure your allocation.","proposed_action":"send_payment","asset":"USDC","amount":"100","recipient_type":"unknown_wallet","channel":"Telegram","verification_status":"unverified","sensitive_data_involved":false}'
 ```
 
 ## Error Format

@@ -5,10 +5,24 @@ export const analyzeModes = [
   "dialogue_check",
   "offer_check",
   "manipulation_check",
-  "safe_reply"
+  "safe_reply",
+  "agent_action_check"
 ] as const;
 
 export const safeReplyTones = ["calm_firm", "polite", "direct", "neutral"] as const;
+
+export const proposedActions = [
+  "send_payment",
+  "share_credentials",
+  "share_seed_phrase",
+  "connect_wallet",
+  "sign_transaction",
+  "click_link",
+  "download_file",
+  "share_sensitive_data",
+  "approve_transfer",
+  "call_external_tool"
+] as const;
 
 const trimmedText = (fieldName: string, maxLength: number) =>
   z
@@ -21,6 +35,13 @@ export const analyzeRequestSchema = z
     mode: z.enum(analyzeModes),
     language: z.string().trim().min(1).max(16).optional(),
     locale: z.string().trim().min(1).max(32).optional(),
+    proposed_action: z.enum(proposedActions).optional(),
+    asset: z.string().trim().min(1).max(120).optional(),
+    amount: z.union([z.string().trim().min(1).max(80), z.number().nonnegative()]).optional(),
+    recipient_type: z.string().trim().min(1).max(120).optional(),
+    channel: z.string().trim().min(1).max(120).optional(),
+    verification_status: z.string().trim().min(1).max(120).optional(),
+    sensitive_data_involved: z.boolean().optional(),
     input: trimmedText("input", 12000).optional(),
     conversation: z
       .array(
@@ -50,4 +71,5 @@ export const analyzeRequestSchema = z
 
 export type AnalyzeMode = (typeof analyzeModes)[number];
 export type SafeReplyTone = (typeof safeReplyTones)[number];
+export type ProposedAction = (typeof proposedActions)[number];
 export type AnalyzeRequest = z.infer<typeof analyzeRequestSchema>;

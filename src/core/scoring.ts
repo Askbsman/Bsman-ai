@@ -232,7 +232,11 @@ function boosterScore(mode: AnalyzeMode, input: string, redFlags: string[]): num
   return score;
 }
 
-export function scoreInput(mode: AnalyzeMode, input: string): ScoreResult {
+export function scoreInput(
+  mode: AnalyzeMode,
+  input: string,
+  evidenceInput = input
+): ScoreResult {
   const normalizedInput = normalizeText(input);
   const detectedPatterns: DetectedPattern[] = [];
   const redFlags: string[] = [];
@@ -245,7 +249,7 @@ export function scoreInput(mode: AnalyzeMode, input: string): ScoreResult {
     if (matchedPhrases.length === 0) continue;
 
     const weight = modeAdjustedWeight(mode, card, matchedPhrases.length);
-    const snippet = evidenceSnippet(input, matchedPhrases);
+    const snippet = evidenceSnippet(evidenceInput || input, matchedPhrases);
     redFlags.push(...(card.red_flags ?? card.signals ?? []));
     detectedPatterns.push({
       id: card.id,

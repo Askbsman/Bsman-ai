@@ -62,6 +62,18 @@ paths:
                   input: Send the deposit now and do not tell anyone. This deal expires in one hour.
                   options:
                     tone: calm_firm
+              agentActionCheck:
+                value:
+                  mode: agent_action_check
+                  language: en
+                  input: This crypto investment guarantees 20% weekly returns. Send crypto today to secure your allocation.
+                  proposed_action: send_payment
+                  asset: USDC
+                  amount: "100"
+                  recipient_type: unknown_wallet
+                  channel: Telegram
+                  verification_status: unverified
+                  sensitive_data_involved: false
       responses:
         "200":
           description: Structured communication risk analysis.
@@ -140,6 +152,7 @@ components:
             - offer_check
             - manipulation_check
             - safe_reply
+            - agent_action_check
         language:
           type: string
           description: Language code. BS Man AI v0.1 supports only en.
@@ -147,6 +160,34 @@ components:
         locale:
           type: string
           description: Future locale hint. Accepted for forward compatibility but not used for scoring in v0.1.
+        proposed_action:
+          type: string
+          enum:
+            - send_payment
+            - share_credentials
+            - share_seed_phrase
+            - connect_wallet
+            - sign_transaction
+            - click_link
+            - download_file
+            - share_sensitive_data
+            - approve_transfer
+            - call_external_tool
+          description: Proposed action for agent_action_check mode.
+        asset:
+          type: string
+        amount:
+          oneOf:
+            - type: string
+            - type: number
+        recipient_type:
+          type: string
+        channel:
+          type: string
+        verification_status:
+          type: string
+        sensitive_data_involved:
+          type: boolean
         input:
           type: string
           minLength: 1
@@ -233,6 +274,7 @@ components:
             - offer_check
             - manipulation_check
             - safe_reply
+            - agent_action_check
         risk_score:
           type: integer
           minimum: 0
@@ -262,6 +304,22 @@ components:
             - "null"
         disclaimer:
           type: string
+        verdict:
+          type: string
+          enum:
+            - proceed
+            - proceed_with_caution
+            - pause_and_verify
+            - require_human_review
+            - do_not_proceed
+        requires_human_review:
+          type: boolean
+        next_best_action:
+          type: string
+        action_risk_reasons:
+          type: array
+          items:
+            type: string
     ErrorResponse:
       type: object
       required:

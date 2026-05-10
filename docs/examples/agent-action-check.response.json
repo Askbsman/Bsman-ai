@@ -1,0 +1,52 @@
+{
+  "mode": "agent_action_check",
+  "risk_score": 100,
+  "risk_level": "critical",
+  "summary": "Critical communication risk detected across 2 pattern(s). Treat the message as unsafe until independently verified.",
+  "detected_patterns": [
+    {
+      "id": "SCAM_CRYPTO_GUARANTEED_RETURNS",
+      "name": "Crypto guaranteed returns",
+      "category": "crypto_investment",
+      "weight": 60,
+      "matched_phrases": [
+        "20% weekly returns",
+        "guarantees 20% weekly returns"
+      ],
+      "confidence": 0.81,
+      "evidence_snippet": "This crypto investment guarantees 20% weekly returns. Send crypto today to secure your allocation."
+    },
+    {
+      "id": "SCAM_FAKE_TOKEN_PRESALE",
+      "name": "Fake token presale",
+      "category": "crypto",
+      "weight": 48,
+      "matched_phrases": [
+        "send crypto today"
+      ],
+      "confidence": 0.74,
+      "evidence_snippet": "investment guarantees 20% weekly returns. Send crypto today to secure your allocation."
+    }
+  ],
+  "red_flags": [
+    "Promises guaranteed returns in a volatile market.",
+    "Downplays or denies investment risk.",
+    "Requests crypto for an unverified presale.",
+    "Uses scarcity and exclusivity to rush payment.",
+    "Uses urgency or deadline pressure.",
+    "Requests a risky payment method, credential, or verification code."
+  ],
+  "recommended_action": "Use the verdict to decide whether the agent should proceed, pause, verify, require human review, or refuse.",
+  "safe_reply": null,
+  "disclaimer": "BS Man Risk API analyzes communication risk signals only. It is not legal advice, financial advice, a lie detector, or a guarantee that something is true or false.",
+  "verdict": "do_not_proceed",
+  "requires_human_review": true,
+  "next_best_action": "Do not perform the proposed action. Stop and require independent verification or human escalation.",
+  "action_risk_reasons": [
+    "The surrounding communication contains critical risk signals.",
+    "The proposed action moves money or approves a transfer.",
+    "The counterparty or request is not independently verified.",
+    "The recipient type increases impersonation, payment, or platform-bypass risk.",
+    "The channel may be easy to impersonate or move off-platform."
+  ]
+}

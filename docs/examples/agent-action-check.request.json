@@ -1,0 +1,12 @@
+{
+  "mode": "agent_action_check",
+  "language": "en",
+  "input": "This crypto investment guarantees 20% weekly returns. Send crypto today to secure your allocation.",
+  "proposed_action": "send_payment",
+  "asset": "USDC",
+  "amount": "100",
+  "recipient_type": "unknown_wallet",
+  "channel": "Telegram",
+  "verification_status": "unverified",
+  "sensitive_data_involved": false
+}
