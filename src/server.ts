@@ -4,9 +4,11 @@ import type { MiddlewareHandler } from "hono";
 import { Hono } from "hono";
 import { analyzeRoute } from "./routes/analyze.js";
 import { createX402Middleware } from "./middleware/x402.js";
+import type { X402Config } from "./config/x402.js";
 import { internalError } from "./utils/api-error.js";
 
 type CreateAppOptions = {
+  x402Config?: X402Config;
   x402Middleware?: MiddlewareHandler;
 };
 
@@ -15,7 +17,7 @@ export function createApp(options: CreateAppOptions = {}) {
 
   app.onError((_error, c) => internalError(c));
 
-  app.use("*", options.x402Middleware ?? createX402Middleware());
+  app.use("*", options.x402Middleware ?? createX402Middleware(options.x402Config));
 
   app.get("/", (c) =>
     c.json({

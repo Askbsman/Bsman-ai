@@ -1,5 +1,6 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import app, { createApp } from "../src/server.js";
+import type { X402Config } from "../src/config/x402.js";
 import cases from "./fixtures/test-cases.json" with { type: "json" };
 
 const modes = [
@@ -52,6 +53,32 @@ function expectSafeError(body: unknown) {
   expect(serialized).not.toContain("node_modules");
 }
 
+const validX402Config: X402Config = {
+  enabled: true,
+  network: "eip155:84532",
+  payTo: "0x0000000000000000000000000000000000000000",
+  facilitatorUrl: "https://x402.org/facilitator",
+  analyzePriceUsd: "0.001",
+  agentActionPriceUsd: "0.005"
+};
+
+async function requestAnalyzeWithConfig(config: X402Config) {
+  const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+  try {
+    const x402App = createApp({ x402Config: config });
+    return await x402App.request("/v1/analyze", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        mode: "scam_check",
+        input: "Your wallet is suspended. Click this urgent link and enter your seed phrase."
+      })
+    });
+  } finally {
+    warnSpy.mockRestore();
+  }
+}
+
 describe("service endpoints", () => {
   test("GET /health returns service status", async () => {
     const response = await app.request("/health");
@@ -95,7 +122,14 @@ describe("service endpoints", () => {
 
 describe("x402 endpoint policy", () => {
   test("X402 disabled keeps POST /v1/analyze behavior unchanged", async () => {
-    const x402DisabledApp = createApp();
+    const x402DisabledApp = createApp({
+      x402Config: {
+        ...validX402Config,
+        enabled: false,
+        payTo: "",
+        facilitatorUrl: ""
+      }
+    });
     const response = await x402DisabledApp.request("/v1/analyze", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -156,6 +190,116 @@ describe("x402 endpoint policy", () => {
     expect(docsResponse.status).toBe(200);
     expect(analyzeResponse.status).toBe(402);
     expect(analyzeBody.error.code).toBe("PAYMENT_REQUIRED");
+  });
+
+  test("enabled x402 with missing pay-to returns a safe config error", async () => {
+    const response = await requestAnalyzeWithConfig({
+      ...validX402Config,
+      payTo: ""
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(body).toEqual({
+      error: {
+        code: "X402_CONFIG_ERROR",
+        message: "x402 is enabled but payment configuration is invalid.",
+        details: {
+          missing: ["X402_PAY_TO"],
+          invalid: []
+        }
+      }
+    });
+    expectSafeError(body);
+  });
+
+  test("enabled x402 with invalid pay-to returns a safe config error", async () => {
+    const response = await requestAnalyzeWithConfig({
+      ...validX402Config,
+      payTo: "not-a-wallet"
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(body.error.code).toBe("X402_CONFIG_ERROR");
+    expect(body.error.details.invalid).toContain("X402_PAY_TO");
+    expectSafeError(body);
+  });
+
+  test("enabled x402 with missing facilitator URL returns a safe config error", async () => {
+    const response = await requestAnalyzeWithConfig({
+      ...validX402Config,
+      facilitatorUrl: ""
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(body.error.code).toBe("X402_CONFIG_ERROR");
+    expect(body.error.details.missing).toContain("X402_FACILITATOR_URL");
+    expectSafeError(body);
+  });
+
+  test("enabled x402 with missing network returns a safe config error", async () => {
+    const response = await requestAnalyzeWithConfig({
+      ...validX402Config,
+      network: ""
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(body.error.code).toBe("X402_CONFIG_ERROR");
+    expect(body.error.details.missing).toContain("X402_NETWORK");
+    expectSafeError(body);
+  });
+
+  test("GET /health remains free when enabled x402 config is invalid", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const invalidConfigApp = createApp({
+      x402Config: {
+        ...validX402Config,
+        payTo: "",
+        facilitatorUrl: ""
+      }
+    });
+
+    const response = await invalidConfigApp.request("/health");
+    const body = await response.json();
+
+    warnSpy.mockRestore();
+    expect(response.status).toBe(200);
+    expect(body).toEqual({
+      ok: true,
+      service: "bsman-risk-api",
+      version: "0.1.0"
+    });
+  });
+
+  test("x402 config errors are complete JSON and do not expose stack traces", async () => {
+    const response = await requestAnalyzeWithConfig({
+      ...validX402Config,
+      network: "base-sepolia",
+      payTo: "0x123",
+      facilitatorUrl: "not-a-url",
+      analyzePriceUsd: "0",
+      agentActionPriceUsd: "-1"
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(body.error).toMatchObject({
+      code: "X402_CONFIG_ERROR",
+      message: "x402 is enabled but payment configuration is invalid."
+    });
+    expect(body.error.details.invalid).toEqual(
+      expect.arrayContaining([
+        "X402_NETWORK",
+        "X402_PAY_TO",
+        "X402_FACILITATOR_URL",
+        "X402_PRICE_ANALYZE_USD",
+        "X402_PRICE_AGENT_ACTION_USD"
+      ])
+    );
+    expectSafeError(body);
   });
 });
 
