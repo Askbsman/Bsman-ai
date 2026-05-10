@@ -75,3 +75,17 @@ Cloudflare Workers may be a good future target, but the Hono runtime entrypoint 
 - No AI provider keys are required.
 - x402 payment enforcement is disabled by default. Set `X402_ENABLED=true` only after configuring testnet payment variables.
 - Keep `docs/openapi.yaml` available with the deployed app if using `GET /docs/openapi.yaml`.
+
+## x402 Troubleshooting
+
+If `POST /v1/analyze` returns `500` after `X402_ENABLED=true`:
+
+- Check `X402_PAY_TO` is set in Render and looks like a 42-character EVM address beginning with `0x`.
+- Check `X402_FACILITATOR_URL` is set and is a valid URL, for example a testnet facilitator URL during Base Sepolia testing.
+- Check `X402_NETWORK` is set. `base-sepolia` maps to `eip155:84532`.
+- Check `X402_PRICE_ANALYZE_USD` and `X402_PRICE_AGENT_ACTION_USD` are positive numbers.
+- Redeploy after changing Render environment variables.
+- Check server logs for safe x402 diagnostics. The API returns `X402_CONFIG_ERROR` for invalid config and `X402_RUNTIME_ERROR` if the payment middleware fails before returning a payment challenge.
+- Confirm `GET /health` remains `200`; health and docs endpoints should stay free.
+
+Do not log or commit private keys, seed phrases, payment signatures, payment headers, or secret facilitator credentials.

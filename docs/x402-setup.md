@@ -52,6 +52,45 @@ Mappings:
 7. Confirm the final response is the normal BS Man Risk API JSON.
 8. Confirm `GET /`, `GET /health`, and `GET /docs/openapi.yaml` remain free.
 
+## Local Diagnostic Reproducer
+
+Use this local setup to verify the payment middleware path without adding secrets:
+
+```powershell
+$env:X402_ENABLED="true"
+$env:X402_NETWORK="base-sepolia"
+$env:X402_PAY_TO="0x0000000000000000000000000000000000000000"
+$env:X402_FACILITATOR_URL="https://x402.org/facilitator"
+$env:X402_PRICE_ANALYZE_USD="0.001"
+$env:X402_PRICE_AGENT_ACTION_USD="0.005"
+npm run dev
+```
+
+Then send an unpaid request:
+
+```bash
+curl -i http://localhost:3000/v1/analyze \
+  -H "content-type: application/json" \
+  -d '{"mode":"scam_check","input":"Click this urgent link and enter your seed phrase."}'
+```
+
+Expected outcomes:
+
+- `402 Payment Required` means the x402 challenge path is working.
+- `X402_RUNTIME_ERROR` means the middleware failed before completing the payment challenge. Check the safe server logs for the x402 error name and message.
+- `X402_CONFIG_ERROR` means one or more required x402 environment variables are missing or invalid.
+
+## Troubleshooting
+
+If `POST /v1/analyze` returns `500` after enabling x402:
+
+- Check `X402_PAY_TO` is present and is a 42-character EVM address that starts with `0x`.
+- Check `X402_FACILITATOR_URL` is present and is a valid URL.
+- Check `X402_NETWORK` is present. `base-sepolia` maps to `eip155:84532`.
+- Check Render environment variables and redeploy after changing them.
+- Check safe server logs for `X402_RUNTIME_ERROR`; logs include only safe diagnostics such as enabled state, network, pay-to presence and format, facilitator host, and error name/message.
+- Confirm `GET /health` still returns `200` so free endpoints are not being charged.
+
 ## Security
 
 - Never commit private wallet keys.
