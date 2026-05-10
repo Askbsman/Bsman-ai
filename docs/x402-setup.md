@@ -79,6 +79,7 @@ Expected outcomes:
 - `402 Payment Required` means the x402 challenge path is working.
 - `X402_RUNTIME_ERROR` means the middleware failed before completing the payment challenge. Check the safe server logs for the x402 error name and message.
 - `X402_CONFIG_ERROR` means one or more required x402 environment variables are missing or invalid.
+- If the facilitator reports `Make sure to call initialize()`, the x402 resource server or HTTP resource server must be initialized before serving paid endpoints. BS Man AI initializes the x402 payment middleware once before the first paid `POST /v1/analyze` request.
 
 ## Troubleshooting
 
@@ -89,6 +90,7 @@ If `POST /v1/analyze` returns `500` after enabling x402:
 - Check `X402_NETWORK` is present. `base-sepolia` maps to `eip155:84532`.
 - Check Render environment variables and redeploy after changing them.
 - Check safe server logs for `X402_RUNTIME_ERROR`; logs include only safe diagnostics such as enabled state, network, pay-to presence and format, facilitator host, and error name/message.
+- If the log mentions `Make sure to call initialize()`, verify the deployed build includes the middleware initialization step before the payment challenge.
 - Confirm `GET /health` still returns `200` so free endpoints are not being charged.
 
 ## Security
