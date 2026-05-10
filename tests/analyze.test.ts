@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import app from "../src/server.js";
+import app, { createApp } from "../src/server.js";
 import cases from "./fixtures/test-cases.json" with { type: "json" };
 
 const modes = [
@@ -90,6 +90,72 @@ describe("service endpoints", () => {
     expect(response.headers.get("content-type")).toContain("text/yaml");
     expect(body).toContain("/health:");
     expect(body).toContain("/v1/analyze:");
+  });
+});
+
+describe("x402 endpoint policy", () => {
+  test("X402 disabled keeps POST /v1/analyze behavior unchanged", async () => {
+    const x402DisabledApp = createApp();
+    const response = await x402DisabledApp.request("/v1/analyze", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        mode: "scam_check",
+        input: "Your wallet is suspended. Click this urgent link and enter your seed phrase."
+      })
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.risk_level).toBe("critical");
+  });
+
+  test("x402 protection can require payment for POST /v1/analyze only", async () => {
+    const protectedApp = createApp({
+      x402Middleware: async (c, next) => {
+        if (c.req.method === "POST" && c.req.path === "/v1/analyze") {
+          return c.json(
+            {
+              error: {
+                code: "PAYMENT_REQUIRED",
+                message: "x402 payment required.",
+                details: {
+                  accepts: [
+                    {
+                      scheme: "exact",
+                      network: "eip155:84532",
+                      price: "$0.001"
+                    }
+                  ]
+                }
+              }
+            },
+            402
+          );
+        }
+
+        await next();
+      }
+    });
+
+    const rootResponse = await protectedApp.request("/");
+    const healthResponse = await protectedApp.request("/health");
+    const docsResponse = await protectedApp.request("/docs/openapi.yaml");
+    const analyzeResponse = await protectedApp.request("/v1/analyze", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        mode: "scam_check",
+        input: "Your wallet is suspended. Click this urgent link and enter your seed phrase."
+      })
+    });
+    const analyzeBody = await analyzeResponse.json();
+
+    expect(rootResponse.status).toBe(200);
+    expect(healthResponse.status).toBe(200);
+    expect(docsResponse.status).toBe(200);
+    expect(analyzeResponse.status).toBe(402);
+    expect(analyzeBody.error.code).toBe("PAYMENT_REQUIRED");
   });
 });
 

@@ -9,7 +9,7 @@ It is built for agent workflows that need a structured communication-risk check 
 ## Status
 
 - API MVP: ready
-- x402 payments: planned
+- x402 payments: implemented behind `X402_ENABLED=true`
 - English-only v0.1: yes
 - AI provider integration: not yet
 - Database: not required for v0.1
@@ -245,17 +245,23 @@ Start compiled server:
 npm start
 ```
 
-## x402 Readiness
+## x402 Payments
 
-This repository is prepared for x402/Bazaar MVP review through metadata, pricing notes, OpenAPI docs, health checks, and clear endpoint boundaries.
+This repository includes x402 middleware wiring for the paid analyze endpoint. It is disabled by default.
 
-x402 payments are **not implemented yet**. The intended future paid endpoint is:
+Default:
+
+```bash
+X402_ENABLED=false
+```
+
+When `X402_ENABLED=true`, the paid endpoint is:
 
 ```text
 POST /v1/analyze
 ```
 
-Free discovery endpoints should remain:
+Free discovery endpoints remain:
 
 ```text
 GET /
@@ -263,7 +269,22 @@ GET /health
 GET /docs/openapi.yaml
 ```
 
-See [docs/x402-integration-notes.md](docs/x402-integration-notes.md) and [docs/pricing.md](docs/pricing.md).
+Required x402 setup for testnet:
+
+```bash
+X402_ENABLED=true
+X402_NETWORK=base-sepolia
+X402_PAY_TO=0xYourReceivingAddress
+X402_FACILITATOR_URL=https://facilitator.x402.org
+X402_PRICE_ANALYZE_USD=0.001
+X402_PRICE_AGENT_ACTION_USD=0.005
+```
+
+`base-sepolia` maps to `eip155:84532`. `base` maps to `eip155:8453`.
+
+Never commit payment keys, facilitator API keys, private wallet keys, or seed phrases. Verify on Base Sepolia before any mainnet deployment.
+
+See [docs/x402-setup.md](docs/x402-setup.md), [docs/x402-integration-notes.md](docs/x402-integration-notes.md), and [docs/pricing.md](docs/pricing.md).
 
 ## Documentation
 
@@ -273,12 +294,13 @@ See [docs/x402-integration-notes.md](docs/x402-integration-notes.md) and [docs/p
 - Pricing draft: [docs/pricing.md](docs/pricing.md)
 - Deployment: [docs/deploy.md](docs/deploy.md)
 - x402 notes: [docs/x402-integration-notes.md](docs/x402-integration-notes.md)
+- x402 setup: [docs/x402-setup.md](docs/x402-setup.md)
 - OpenAPI: [docs/openapi.yaml](docs/openapi.yaml)
 - Bazaar metadata: [docs/bazaar-metadata.json](docs/bazaar-metadata.json)
 
 ## Roadmap
 
-- Add x402 payment enforcement for `POST /v1/analyze`
+- Verify x402 payment enforcement on Base Sepolia
 - Expand scam and manipulation datasets
 - Add more locale-aware English variants
 - Add optional AI-assisted analysis after deterministic MVP validation

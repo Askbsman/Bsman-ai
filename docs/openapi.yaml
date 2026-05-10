@@ -87,6 +87,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "402":
+          description: Payment required when x402 protection is enabled.
+          content:
+            application/json:
+              schema:
+                type: object
         "500":
           description: Internal error.
           content:

@@ -1,7 +1,7 @@
 {
   "name": "BS Man AI",
   "short_description": "Conversation Risk Intelligence API for AI agents.",
-  "description": "BS Man AI analyzes English messages, offers, and dialogues for scam signals, manipulation tactics, unrealistic promises, pressure patterns, and unsafe next-step recommendations. It is built as an x402-ready MVP for agent workflows, but x402 payment enforcement is not implemented yet.",
+  "description": "BS Man AI analyzes English messages, offers, and dialogues for scam signals, manipulation tactics, unrealistic promises, pressure patterns, and unsafe next-step recommendations. It includes x402 middleware for POST /v1/analyze when X402_ENABLED=true, with discovery and health endpoints kept free.",
   "category": "security",
   "tags": [
     "x402",
@@ -42,7 +42,7 @@
     "analyze": {
       "method": "POST",
       "path": "/v1/analyze",
-      "paid": "planned"
+      "paid": "when X402_ENABLED=true"
     }
   },
   "pricing_draft": {
