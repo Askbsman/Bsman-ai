@@ -34,6 +34,8 @@ Discovery references:
 
 The API root at `https://api.callbsman.com/` returns agent-friendly resource metadata, including the paid analyze resource, sample endpoints, x402 payment details, and OpenAPI links.
 
+OpenAPI `GET /v1/analyze` and `POST /v1/analyze` include `responses.402` and `x-payment-info` annotations so discovery tools can identify the operations as paid x402 resources.
+
 ## Unpaid Request
 
 Send a request without payment to inspect the x402 challenge:

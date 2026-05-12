@@ -100,6 +100,19 @@ const x402OpenApiMetadata = {
   bazaarMetadata: "docs/bazaar-metadata.json"
 } as const;
 
+const agentCashPaymentInfo = {
+  price: {
+    mode: "fixed",
+    currency: "USD",
+    amount: "0.001000"
+  },
+  protocols: [
+    {
+      x402: {}
+    }
+  ]
+} as const;
+
 export const openApiJsonDocument = {
   openapi: "3.1.0",
   info: {
@@ -202,12 +215,13 @@ export const openApiJsonDocument = {
         summary: "Paid x402 discovery/capability probe",
         operationId: "getAnalyzeCapability",
         "x-x402": x402OpenApiMetadata,
+        "x-payment-info": agentCashPaymentInfo,
         responses: {
           "200": {
             description: "Capability JSON after verified x402 payment."
           },
           "402": {
-            description: "x402 Payment Required challenge."
+            description: "Payment Required"
           }
         }
       },
@@ -215,6 +229,7 @@ export const openApiJsonDocument = {
         summary: "Analyze communication risk signals",
         operationId: "analyzeConversationRisk",
         "x-x402": x402OpenApiMetadata,
+        "x-payment-info": agentCashPaymentInfo,
         requestBody: {
           required: true,
           content: {
@@ -238,7 +253,7 @@ export const openApiJsonDocument = {
             description: "Invalid request body."
           },
           "402": {
-            description: "x402 Payment Required challenge."
+            description: "Payment Required"
           }
         }
       }

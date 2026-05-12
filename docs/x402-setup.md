@@ -56,6 +56,7 @@ Discovery validators may probe GET /v1/analyze. BS Man AI supports GET /v1/analy
 - `description`: Conversation Risk Intelligence API for AI agents
 - `mimeType`: `application/json`
 - Bazaar discovery extension: JSON body example, request schema summary, and response example/schema summary
+- OpenAPI `x-payment-info`: fixed USD price and x402 protocol annotations for AgentCash-style discovery
 - Public canonical metadata: `docs/bazaar-metadata.json`
 
 BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Official Coinbase Bazaar auto-indexing may require CDP Facilitator settlement. The current production endpoint uses xpay facilitator on Base mainnet because CDP onboarding is not available in the current setup.

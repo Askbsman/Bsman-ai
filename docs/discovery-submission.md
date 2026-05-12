@@ -60,6 +60,7 @@ GET https://api.callbsman.com/docs/openapi.yaml
 - GitHub: `https://github.com/Askbsman/Bsman-ai`
 - Bazaar metadata: `docs/bazaar-metadata.json`
 - Bazaar listing draft: `docs/bazaar-listing.md`
+- OpenAPI paid-operation annotations: `GET /v1/analyze` and `POST /v1/analyze` include `responses.402` and `x-payment-info`
 
 ## Payment
 

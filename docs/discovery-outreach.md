@@ -100,9 +100,10 @@ Current BS Man AI status:
 - The API root at `https://api.callbsman.com/` returns agent-friendly resource metadata, including the paid analyze resource, sample endpoints, x402 payment details, and OpenAPI links.
 - OpenAPI JSON is available at `https://api.callbsman.com/openapi.json`.
 - OpenAPI YAML is available at `https://api.callbsman.com/openapi.yaml` and `https://api.callbsman.com/docs/openapi.yaml`.
+- OpenAPI `GET /v1/analyze` and `POST /v1/analyze` include `responses.402` and `x-payment-info` with fixed USD price and x402 protocol annotations for AgentCash-style discovery.
 - Runtime x402 paid request has previously succeeded through AgentCash.
 - The `PAYMENT-REQUIRED` header is canonical. The JSON body mirrors the same PaymentRequired payload for clients that read the body.
-- AgentCash-specific `x-payment-info` annotations may improve discoverability later.
+- AgentCash-specific `x-payment-info` annotations are present; future `x-payment-info` schema refinements should be docs-driven and should not change runtime x402 behavior.
 
 Attempted check:
 

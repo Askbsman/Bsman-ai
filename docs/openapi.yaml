@@ -98,6 +98,13 @@ paths:
         mimeType: application/json
         mainMode: agent_action_check
         bazaarMetadata: docs/bazaar-metadata.json
+      x-payment-info:
+        price:
+          mode: fixed
+          currency: USD
+          amount: "0.001000"
+        protocols:
+          - x402: {}
       responses:
         "200":
           description: Capability JSON after verified x402 payment.
@@ -106,7 +113,7 @@ paths:
               schema:
                 type: object
         "402":
-          description: x402 Payment Required challenge.
+          description: Payment Required
           headers:
             PAYMENT-REQUIRED:
               description: Base64url encoded x402 PaymentRequired payload.
@@ -128,6 +135,13 @@ paths:
         mimeType: application/json
         mainMode: agent_action_check
         bazaarMetadata: docs/bazaar-metadata.json
+      x-payment-info:
+        price:
+          mode: fixed
+          currency: USD
+          amount: "0.001000"
+        protocols:
+          - x402: {}
       requestBody:
         required: true
         content:
@@ -173,7 +187,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "402":
-          description: Payment required when x402 protection is enabled.
+          description: Payment Required
           content:
             application/json:
               schema:

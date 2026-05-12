@@ -183,10 +183,34 @@ describe("service endpoints", () => {
       payment: "x402",
       resource: "https://api.callbsman.com/v1/analyze"
     });
+    expect(jsonBody.paths["/v1/analyze"].get["x-payment-info"]).toMatchObject({
+      price: {
+        mode: "fixed",
+        currency: "USD",
+        amount: "0.001000"
+      },
+      protocols: [{ x402: {} }]
+    });
+    expect(jsonBody.paths["/v1/analyze"].post["x-payment-info"]).toMatchObject({
+      price: {
+        mode: "fixed",
+        currency: "USD",
+        amount: "0.001000"
+      },
+      protocols: [{ x402: {} }]
+    });
+    expect(jsonBody.paths["/v1/analyze"].get.responses["402"]).toMatchObject({
+      description: "Payment Required"
+    });
+    expect(jsonBody.paths["/v1/analyze"].post.responses["402"]).toMatchObject({
+      description: "Payment Required"
+    });
     expect(docsJsonBody.paths["/v1/analyze"].get.summary).toContain(
       "discovery"
     );
     expect(yamlBody).toContain("/v1/analyze:");
+    expect(yamlBody).toContain("x-payment-info:");
+    expect(yamlBody).toContain('amount: "0.001000"');
   });
 });
 
