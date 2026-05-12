@@ -227,11 +227,13 @@ describe("x402 endpoint policy", () => {
     expect(route.mimeType).toBe("application/json");
     expect(route.accepts).toMatchObject({
       extra: {
-        name: "Call BS Man API",
-        provider: "BS Man AI",
-        category: "Security",
-        tags: expect.arrayContaining(["x402", "AI agents", "AgentCash"]),
-        fallbackUrl: "https://bsman-ai.onrender.com/v1/analyze"
+        bsman: {
+          name: "Call BS Man API",
+          provider: "BS Man AI",
+          category: "Security",
+          tags: expect.arrayContaining(["x402", "AI agents", "AgentCash"]),
+          fallbackUrl: "https://bsman-ai.onrender.com/v1/analyze"
+        }
       }
     });
     expect(route.extensions?.bazaar).toMatchObject({
@@ -299,11 +301,14 @@ describe("x402 endpoint policy", () => {
           payTo: "0x7642CCEd89398Bd638d9Ee2F82dA8cd3FC01ADA1",
           maxTimeoutSeconds: 60,
           extra: {
-            name: "Call BS Man API",
+            name: "USD Coin",
             version: "2",
-            provider: "BS Man AI",
-            category: "Security",
-            tags: expect.arrayContaining(["x402", "AI agents", "AgentCash"])
+            bsman: {
+              name: "Call BS Man API",
+              provider: "BS Man AI",
+              category: "Security",
+              tags: expect.arrayContaining(["x402", "AI agents", "AgentCash"])
+            }
           }
         }
       ],
@@ -317,6 +322,10 @@ describe("x402 endpoint policy", () => {
         openApiUrl: "https://api.callbsman.com/docs/openapi.yaml"
       }
     });
+    expect(
+      (responseBody?.body as { accepts: Array<{ extra: Record<string, unknown> }> })
+        .accepts[0].extra.name
+    ).not.toBe("Call BS Man API");
     expect(getResponseBody?.body).toMatchObject({
       x402Version: 2,
       resource: {

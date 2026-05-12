@@ -106,16 +106,18 @@ function createAnalyzePaymentOption(config: X402Config): AnalyzePaymentOption {
     payTo: config.payTo,
     maxTimeoutSeconds: 60,
     extra: {
-      name: bazaarDiscoveryMetadata.name,
-      provider: bazaarDiscoveryMetadata.provider,
-      category: bazaarDiscoveryMetadata.category,
-      tags: [...bazaarDiscoveryMetadata.tags],
-      docsUrl: bazaarDiscoveryMetadata.docsUrl,
-      openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
-      githubUrl: bazaarDiscoveryMetadata.githubUrl,
-      mainMode: bazaarDiscoveryMetadata.mainMode,
-      supportedModes: [...bazaarDiscoveryMetadata.supportedModes],
-      fallbackUrl: bazaarDiscoveryMetadata.fallbackUrl
+      bsman: {
+        name: bazaarDiscoveryMetadata.name,
+        provider: bazaarDiscoveryMetadata.provider,
+        category: bazaarDiscoveryMetadata.category,
+        tags: [...bazaarDiscoveryMetadata.tags],
+        docsUrl: bazaarDiscoveryMetadata.docsUrl,
+        openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
+        githubUrl: bazaarDiscoveryMetadata.githubUrl,
+        mainMode: bazaarDiscoveryMetadata.mainMode,
+        supportedModes: [...bazaarDiscoveryMetadata.supportedModes],
+        fallbackUrl: bazaarDiscoveryMetadata.fallbackUrl
+      }
     }
   };
 }
