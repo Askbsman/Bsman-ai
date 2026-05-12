@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { analyze } from "../core/analyzer.js";
+import { analyzeCapabilityResponse } from "../config/discovery.js";
 import {
   analyzeRequestSchema,
   normalizeAnalyzeRequest
@@ -7,6 +8,8 @@ import {
 import { unsupportedLanguageError, validationError } from "../utils/api-error.js";
 
 export const analyzeRoute = new Hono();
+
+analyzeRoute.get("/analyze", (c) => c.json(analyzeCapabilityResponse));
 
 analyzeRoute.post("/analyze", async (c) => {
   let body: unknown;

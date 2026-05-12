@@ -34,6 +34,8 @@ POST https://api.callbsman.com/v1/analyze
 https://api.callbsman.com/v1/analyze
 ```
 
+Discovery validators may probe GET /v1/analyze. BS Man AI supports GET /v1/analyze as a paid discovery/capability probe and POST /v1/analyze as the paid analysis endpoint.
+
 ## Fallback Endpoint
 
 ```text
@@ -62,7 +64,8 @@ GET https://api.callbsman.com/docs/openapi.yaml
 - Network: Base mainnet
 - Asset: USDC
 - Price: `$0.001` per analyze request
-- Paid endpoint: `POST /v1/analyze`
+- Paid discovery probe: `GET /v1/analyze`
+- Paid analysis endpoint: `POST /v1/analyze`
 - MIME type: `application/json`
 - Current facilitator: xpay facilitator on Base mainnet
 
@@ -220,6 +223,7 @@ Call BS Man API is an x402-paid Conversation Risk Intelligence API for AI agents
 ## Suggested Submission Notes
 
 - Public API domain: `https://api.callbsman.com`
+- Paid discovery probe: `GET https://api.callbsman.com/v1/analyze`
 - Paid resource: `POST https://api.callbsman.com/v1/analyze`
 - Fallback resource: `https://bsman-ai.onrender.com/v1/analyze`
 - Free OpenAPI endpoint: `https://api.callbsman.com/docs/openapi.yaml`

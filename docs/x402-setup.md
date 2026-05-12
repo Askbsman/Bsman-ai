@@ -8,7 +8,7 @@ Default behavior:
 X402_ENABLED=false
 ```
 
-With the default value, `POST /v1/analyze` behaves exactly like the local deterministic API and does not require payment.
+With the default value, `POST /v1/analyze` behaves exactly like the local deterministic API and does not require payment. `GET /v1/analyze` returns capability JSON for local and developer discovery.
 
 ## Public Domains
 
@@ -40,7 +40,24 @@ Free endpoints:
 
 Paid endpoint when `X402_ENABLED=true`:
 
+- `GET /v1/analyze` as a discovery/capability probe
 - `POST /v1/analyze`
+
+Discovery validators may probe GET /v1/analyze. BS Man AI supports GET /v1/analyze as a paid discovery/capability probe and POST /v1/analyze as the paid analysis endpoint.
+
+## Bazaar Discovery Metadata
+
+`GET /v1/analyze` and `POST /v1/analyze` declare Bazaar-compatible x402 discovery metadata where the installed x402 SDK supports it:
+
+- `resource`: `https://api.callbsman.com/v1/analyze`
+- `description`: Conversation Risk Intelligence API for AI agents
+- `mimeType`: `application/json`
+- Bazaar discovery extension: JSON body example, request schema summary, and response example/schema summary
+- Public canonical metadata: `docs/bazaar-metadata.json`
+
+BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Official Coinbase Bazaar auto-indexing may require CDP Facilitator settlement. The current production endpoint uses xpay facilitator on Base mainnet because CDP onboarding is not available in the current setup.
+
+Stage 1.5 does not switch facilitators, add CDP secrets, change pricing, or change Render environment variables. TODO: activate CDP/Bazaar auto-indexing only after CDP onboarding and CDP Facilitator settlement are available and tested.
 
 ## Environment Variables
 
@@ -59,7 +76,7 @@ Mappings:
 - `X402_NETWORK=base` maps to `eip155:8453`
 - CAIP-2 values such as `eip155:84532` can also be used directly
 
-`X402_PRICE_AGENT_ACTION_USD` is documented for pricing policy and future split endpoints. The current middleware protects all `POST /v1/analyze` modes with `X402_PRICE_ANALYZE_USD`.
+`X402_PRICE_AGENT_ACTION_USD` is documented for pricing policy and future split endpoints. The current middleware protects `GET /v1/analyze` and all `POST /v1/analyze` modes with `X402_PRICE_ANALYZE_USD`.
 
 ## Testnet Checklist
 
@@ -67,7 +84,7 @@ Mappings:
 2. Set `X402_NETWORK=base-sepolia`.
 3. Set `X402_PAY_TO` to a receiving wallet address.
 4. Set `X402_FACILITATOR_URL` to a testnet facilitator.
-5. Request `POST /v1/analyze` without payment and confirm `402 Payment Required`.
+5. Request `GET /v1/analyze` and `POST /v1/analyze` without payment and confirm `402 Payment Required`.
 6. Retry with an x402-compatible client and testnet wallet.
 7. Confirm the final response is the normal BS Man Risk API JSON.
 8. Confirm `GET /`, `GET /health`, and `GET /docs/openapi.yaml` remain free.
@@ -94,16 +111,23 @@ curl -i http://localhost:3000/v1/analyze \
   -d '{"mode":"scam_check","input":"Click this urgent link and enter your seed phrase."}'
 ```
 
+For discovery probe compatibility, also check:
+
+```bash
+curl -i http://localhost:3000/v1/analyze
+```
+
 Expected outcomes:
 
 - `402 Payment Required` means the x402 challenge path is working.
+- The unpaid GET/POST x402 response should include the `PAYMENT-REQUIRED` header.
 - `X402_RUNTIME_ERROR` means the middleware failed before completing the payment challenge. Check the safe server logs for the x402 error name and message.
 - `X402_CONFIG_ERROR` means one or more required x402 environment variables are missing or invalid.
 - If the facilitator reports `Make sure to call initialize()`, the x402 resource server or HTTP resource server must be initialized before serving paid endpoints. BS Man AI initializes the x402 payment middleware once before the first paid `POST /v1/analyze` request.
 
 ## Troubleshooting
 
-If `POST /v1/analyze` returns `500` after enabling x402:
+If `GET /v1/analyze` or `POST /v1/analyze` returns `500` after enabling x402:
 
 - Check `X402_PAY_TO` is present and is a 42-character EVM address that starts with `0x`.
 - Check `X402_FACILITATOR_URL` is present and is a valid URL.
@@ -119,4 +143,4 @@ If `POST /v1/analyze` returns `500` after enabling x402:
 - Never commit facilitator API keys.
 - Never log payment signatures, payment headers, private keys, or seed phrases.
 - Keep stack traces out of API responses.
-- Do not deploy mainnet payment enforcement until Base Sepolia works end to end.
+- Do not add CDP secrets or switch facilitators as part of Bazaar metadata-only work.

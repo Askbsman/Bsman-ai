@@ -21,6 +21,7 @@ Submission path:
 Current BS Man AI status:
 
 - Bazaar-compatible metadata exists.
+- Discovery validators may probe GET /v1/analyze. BS Man AI supports GET /v1/analyze as a paid discovery/capability probe and POST /v1/analyze as the paid analysis endpoint.
 - Production settlement currently uses xpay facilitator on Base mainnet.
 - Do not switch facilitator until Coinbase/CDP registration is available.
 
@@ -47,7 +48,7 @@ Action:
 
 Expected current result:
 
-- x402 endpoint may validate as payment-protected.
+- x402 endpoint should validate as payment-protected for GET discovery probes when the production deployment includes Stage 1.9.1.
 - Bazaar indexed status may remain unavailable until CDP Facilitator settlement is completed.
 
 ### 3. x402.org Ecosystem
@@ -173,6 +174,8 @@ It gives AI agents a preflight risk check before payments, wallet actions, links
 POST `https://api.callbsman.com/v1/analyze`
 
 `$0.001` per analyze request via x402.
+
+Discovery-compatible GET probe: `https://api.callbsman.com/v1/analyze`
 
 Main mode: `agent_action_check`
 

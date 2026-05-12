@@ -8,6 +8,10 @@ POST https://api.callbsman.com/v1/analyze
 
 The endpoint is x402-paid on Base mainnet and costs `$0.001` per analyze request.
 
+Discovery validators may probe GET /v1/analyze. BS Man AI supports GET /v1/analyze as a paid discovery/capability probe and POST /v1/analyze as the paid analysis endpoint.
+
+BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Official Coinbase Bazaar auto-indexing may require CDP Facilitator settlement. The current production endpoint uses xpay facilitator on Base mainnet because CDP onboarding is not available in the current setup.
+
 Primary API endpoint:
 
 ```text
@@ -19,6 +23,13 @@ Fallback Render endpoint:
 ```text
 https://bsman-ai.onrender.com
 ```
+
+Discovery references:
+
+- Bazaar metadata: `docs/bazaar-metadata.json`
+- OpenAPI: `https://api.callbsman.com/docs/openapi.yaml`
+- Resource URL: `https://api.callbsman.com/v1/analyze`
+- Fallback resource URL: `https://bsman-ai.onrender.com/v1/analyze`
 
 ## Unpaid Request
 
@@ -35,6 +46,14 @@ Expected:
 ```text
 HTTP 402 Payment Required
 ```
+
+Discovery probe:
+
+```bash
+curl -i https://api.callbsman.com/v1/analyze
+```
+
+When x402 is enabled, unpaid `GET /v1/analyze` also returns `402 Payment Required` with the `PAYMENT-REQUIRED` header. After a verified paid GET, the endpoint returns lightweight capability JSON. It does not run analysis; use paid `POST /v1/analyze` for risk analysis.
 
 ## Paid Request With AgentCash
 
@@ -75,6 +94,31 @@ Before running a paid request, confirm:
     "channel": "marketplace_chat",
     "verification_status": "unverified",
     "sensitive_data_involved": false
+  },
+  "language": "en",
+  "locale": "US"
+}
+```
+
+Agent-friendly object input is also supported and remains backward compatible with legacy string input:
+
+```json
+{
+  "mode": "agent_action_check",
+  "input": {
+    "text": "A Telegram admin says I must connect my wallet to verify or lose access.",
+    "conversation": [],
+    "context": {
+      "proposed_action": "connect_wallet",
+      "recipient_type": "telegram_admin",
+      "channel": "telegram",
+      "verification_status": "unverified"
+    }
+  },
+  "options": {
+    "include_safe_reply": true,
+    "include_detected_patterns": true,
+    "risk_detail_level": "standard"
   },
   "language": "en",
   "locale": "US"
