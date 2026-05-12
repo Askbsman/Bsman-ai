@@ -1,0 +1,19 @@
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid request body.",
+    "details": [
+      {
+        "origin": "array",
+        "code": "too_small",
+        "minimum": 1,
+        "inclusive": true,
+        "path": [
+          "input",
+          "conversation"
+        ],
+        "message": "Too small: expected array to have >=1 items"
+      }
+    ]
+  }
+}

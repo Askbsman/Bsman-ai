@@ -1,0 +1,89 @@
+{
+  "name": "BS Man AI",
+  "short_description": "Conversation Risk Intelligence API for AI agents.",
+  "description": "BS Man AI analyzes English messages, offers, and dialogues for scam signals, manipulation tactics, unrealistic promises, pressure patterns, and unsafe next-step recommendations. The public POST /v1/analyze endpoint is x402-paid on Base mainnet, with discovery, health, and OpenAPI endpoints kept free.",
+  "category": "security",
+  "landing_url": "https://callbsman.com",
+  "github_url": "https://github.com/Askbsman/Bsman-ai",
+  "tags": [
+    "x402",
+    "ai-agents",
+    "scam-detection",
+    "risk-analysis",
+    "conversation-intelligence",
+    "phishing",
+    "manipulation-detection"
+  ],
+  "version": "0.1.0",
+  "language": "en",
+  "supported_locales": ["en"],
+  "modes": [
+    "scam_check",
+    "dialogue_check",
+    "offer_check",
+    "manipulation_check",
+    "safe_reply",
+    "agent_action_check"
+  ],
+  "endpoints": {
+    "base_url": "https://api.callbsman.com",
+    "fallback_base_url": "https://bsman-ai.onrender.com",
+    "health": {
+      "method": "GET",
+      "path": "/health",
+      "url": "https://api.callbsman.com/health",
+      "paid": false
+    },
+    "metadata": {
+      "method": "GET",
+      "path": "/",
+      "url": "https://api.callbsman.com/",
+      "paid": false
+    },
+    "openapi": {
+      "method": "GET",
+      "path": "/docs/openapi.yaml",
+      "url": "https://api.callbsman.com/docs/openapi.yaml",
+      "paid": false
+    },
+    "analyze": {
+      "method": "POST",
+      "path": "/v1/analyze",
+      "url": "https://api.callbsman.com/v1/analyze",
+      "paid": true
+    }
+  },
+  "payment": {
+    "protocol": "x402",
+    "network": "Base mainnet",
+    "asset": "USDC",
+    "price_usd": "0.001",
+    "unit": "per analyze request",
+    "agentcash_paid_request": "tested successfully"
+  },
+  "pricing": {
+    "status": "live",
+    "price_usd": "0.001",
+    "unit": "per analyze request",
+    "free_endpoints": ["/", "/health", "/docs/openapi.yaml"],
+    "paid_endpoints": ["/v1/analyze"]
+  },
+  "disclaimers": [
+    "Not legal advice.",
+    "Not financial advice.",
+    "Not a lie detector.",
+    "Not a guarantee that something is true or false.",
+    "Analyzes communication risk signals only."
+  ],
+  "use_cases": [
+    "Agent preflight check before recommending a payment or next step.",
+    "Scam and phishing risk review for user-submitted messages.",
+    "Manipulation and pressure-pattern detection in dialogue.",
+    "Offer risk review for jobs, rentals, investments, marketplace deals, and loans.",
+    "Safe reply generation that sets a verification boundary.",
+    "Agent action preflight checks for payment, wallet, credential, link, file, and external-tool actions."
+  ],
+  "input_schema_ref": "docs/openapi.yaml#/components/schemas/AnalyzeRequest",
+  "output_schema_ref": "docs/openapi.yaml#/components/schemas/AnalyzeResponse",
+  "openapi_ref": "docs/openapi.yaml"
+}

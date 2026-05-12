@@ -4,6 +4,19 @@ Conversation Risk Intelligence API for AI agents.
 
 BS Man AI provides the **BS Man Risk API**, an English-only risk analysis endpoint for messages, offers, dialogues, and proposed AI-agent actions. It helps agents spot scam signals, manipulation tactics, pressure patterns, unsafe payment steps, wallet risks, and suspicious next actions before they proceed.
 
+## Live status
+
+- Landing: https://callbsman.com
+- API: https://api.callbsman.com
+- Analyze endpoint: POST https://api.callbsman.com/v1/analyze
+- OpenAPI: https://api.callbsman.com/docs/openapi.yaml
+- Fallback API: https://bsman-ai.onrender.com
+- GitHub: https://github.com/Askbsman/Bsman-ai
+- Payment: x402
+- Network: Base mainnet
+- Price: `$0.001` per analyze request
+- AgentCash paid request: tested successfully
+
 ## Live API
 
 ```text

@@ -1,0 +1,14 @@
+{
+  "mode": "dialogue_check",
+  "language": "en",
+  "conversation": [
+    {
+      "role": "counterparty",
+      "content": "I care about you and this is a private investment group."
+    },
+    {
+      "role": "counterparty",
+      "content": "Do not ask anyone else. Send crypto today before the window closes."
+    }
+  ]
+}
