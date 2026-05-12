@@ -37,34 +37,34 @@ function price(value: string): string {
 export function createX402PaymentRequiredBody(
   config: X402Config,
   context: Pick<HTTPRequestContext, "method" | "path">
-) {
+): Promise<Record<string, unknown>> {
   const requestMethod = context.method.toUpperCase();
   const publicPrice = price(config.analyzePriceUsd);
+  const resource = {
+    url: bazaarDiscoveryMetadata.resourceUrl,
+    description:
+      "Conversation Risk Intelligence API for AI agents. Call BS Man API analyzes chats, offers, and proposed agent actions for scam signals, manipulation tactics, unsafe payment requests, wallet/payment risk, and risky next steps.",
+    mimeType: bazaarDiscoveryMetadata.mimeType
+  };
 
-  return {
+  return buildAnalyzePaymentRequirements(config).then((accepts) => ({
     x402Version: 2,
-    error: {
-      code: "PAYMENT_REQUIRED",
-      message: "x402 payment required.",
-      details: {
-        paymentRequiredHeader: "PAYMENT-REQUIRED",
-        headerIsCanonical: true,
-        hint:
-          "Read the PAYMENT-REQUIRED header for the canonical x402 payment challenge. This JSON body is a compatibility fallback for API clients."
-      }
+    error: "Payment required",
+    resource,
+    accepts,
+    extensions:
+      requestMethod === "GET"
+        ? createBazaarCapabilityDiscoveryExtensions()
+        : createBazaarAnalyzeDiscoveryExtensions(),
+    compatibility: {
+      paymentRequiredHeader: "PAYMENT-REQUIRED",
+      headerIsCanonical: true,
+      hint:
+        "The PAYMENT-REQUIRED header is canonical. This JSON body mirrors the same PaymentRequired payload for clients that read the body."
     },
-    resource: bazaarDiscoveryMetadata.resourceUrl,
+    resourceUrl: bazaarDiscoveryMetadata.resourceUrl,
     method: requestMethod,
     endpoint: `${requestMethod} ${bazaarDiscoveryMetadata.resourceUrl}`,
-    accepts: [
-      {
-        scheme: "exact",
-        network: config.network,
-        price: publicPrice,
-        payTo: config.payTo,
-        maxTimeoutSeconds: 60
-      }
-    ],
     payment: {
       protocol: bazaarDiscoveryMetadata.payment.protocol,
       network: bazaarDiscoveryMetadata.payment.network,
@@ -86,13 +86,67 @@ export function createX402PaymentRequiredBody(
       tags: [...bazaarDiscoveryMetadata.tags],
       fallbackUrl: bazaarDiscoveryMetadata.fallbackUrl
     }
+  }));
+}
+
+type AnalyzePaymentOption = {
+  scheme: "exact";
+  price: string;
+  network: `${string}:${string}`;
+  payTo: string;
+  maxTimeoutSeconds: number;
+  extra: Record<string, unknown>;
+};
+
+function createAnalyzePaymentOption(config: X402Config): AnalyzePaymentOption {
+  return {
+    scheme: "exact",
+    price: price(config.analyzePriceUsd),
+    network: config.network as `${string}:${string}`,
+    payTo: config.payTo,
+    maxTimeoutSeconds: 60,
+    extra: {
+      name: bazaarDiscoveryMetadata.name,
+      provider: bazaarDiscoveryMetadata.provider,
+      category: bazaarDiscoveryMetadata.category,
+      tags: [...bazaarDiscoveryMetadata.tags],
+      docsUrl: bazaarDiscoveryMetadata.docsUrl,
+      openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
+      githubUrl: bazaarDiscoveryMetadata.githubUrl,
+      mainMode: bazaarDiscoveryMetadata.mainMode,
+      supportedModes: [...bazaarDiscoveryMetadata.supportedModes],
+      fallbackUrl: bazaarDiscoveryMetadata.fallbackUrl
+    }
   };
 }
 
+async function buildAnalyzePaymentRequirements(config: X402Config) {
+  const option = createAnalyzePaymentOption(config);
+  const parsedPrice = await new ExactEvmScheme().parsePrice(
+    option.price,
+    option.network
+  );
+
+  return [
+    {
+      scheme: option.scheme,
+      network: option.network,
+      amount: parsedPrice.amount,
+      asset: parsedPrice.asset,
+      payTo: option.payTo,
+      maxTimeoutSeconds: option.maxTimeoutSeconds ?? 300,
+      extra: {
+        ...parsedPrice.extra,
+        ...option.extra
+      }
+    }
+  ];
+}
+
 function createUnpaidResponseBody(config: X402Config) {
-  return (context: HTTPRequestContext): HTTPResponseBody => ({
+  return async (context: HTTPRequestContext): Promise<HTTPResponseBody> => ({
     contentType: "application/json",
-    body: createX402PaymentRequiredBody(config, context)
+    body: await createX402PaymentRequiredBody(config, context)
   });
 }
 
@@ -175,25 +229,7 @@ function logInitialization(
 }
 
 export function createX402AnalyzeRoutes(config: X402Config) {
-  const createAccepts = () => ({
-    scheme: "exact",
-    price: price(config.analyzePriceUsd),
-    network: config.network as `${string}:${string}`,
-    payTo: config.payTo,
-    maxTimeoutSeconds: 60,
-    extra: {
-      name: bazaarDiscoveryMetadata.name,
-      provider: bazaarDiscoveryMetadata.provider,
-      category: bazaarDiscoveryMetadata.category,
-      tags: [...bazaarDiscoveryMetadata.tags],
-      docsUrl: bazaarDiscoveryMetadata.docsUrl,
-      openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
-      githubUrl: bazaarDiscoveryMetadata.githubUrl,
-      mainMode: bazaarDiscoveryMetadata.mainMode,
-      supportedModes: [...bazaarDiscoveryMetadata.supportedModes],
-      fallbackUrl: bazaarDiscoveryMetadata.fallbackUrl
-    }
-  });
+  const createAccepts = () => createAnalyzePaymentOption(config);
   const baseRoute = {
     resource: bazaarDiscoveryMetadata.resourceUrl,
     description:

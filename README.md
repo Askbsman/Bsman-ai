@@ -73,7 +73,7 @@ Expected result:
 HTTP/2 402
 ```
 
-The unpaid response includes the canonical x402 `PAYMENT-REQUIRED` header and a small JSON compatibility body for AgentCash-style API clients.
+The `PAYMENT-REQUIRED` header is canonical. The JSON body mirrors the same PaymentRequired payload for clients that read the body, including `x402Version`, `resource.url`, `accepts[0].amount`, `accepts[0].asset`, and `accepts[0].payTo`.
 
 ## AgentCash Paid Request
 

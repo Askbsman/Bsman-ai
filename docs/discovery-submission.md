@@ -68,7 +68,7 @@ GET https://api.callbsman.com/docs/openapi.yaml
 - Paid analysis endpoint: `POST /v1/analyze`
 - MIME type: `application/json`
 - Current facilitator: xpay facilitator on Base mainnet
-- Unpaid 402 response: canonical `PAYMENT-REQUIRED` header plus JSON compatibility body for AgentCash-style API clients
+- Unpaid 402 response: the `PAYMENT-REQUIRED` header is canonical. The JSON body mirrors the same PaymentRequired payload for clients that read the body.
 
 ## Discovery And Indexing Note
 

@@ -67,6 +67,12 @@ const validX402Config: X402Config = {
   agentActionPriceUsd: "0.005"
 };
 
+const baseMainnetX402Config: X402Config = {
+  ...validX402Config,
+  network: "eip155:8453",
+  payTo: "0x7642CCEd89398Bd638d9Ee2F82dA8cd3FC01ADA1"
+};
+
 async function requestAnalyzeWithConfig(config: X402Config) {
   const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
   try {
@@ -163,8 +169,8 @@ describe("x402 endpoint policy", () => {
     expect(getRoute.mimeType).toBe("application/json");
   });
 
-  test("x402 unpaid response body includes AgentCash-compatible fallback metadata", async () => {
-    const routes = createX402AnalyzeRoutes(validX402Config);
+  test("x402 unpaid response body mirrors canonical PaymentRequired fields", async () => {
+    const routes = createX402AnalyzeRoutes(baseMainnetX402Config);
     const route = routes["POST /v1/analyze"];
     const getRoute = routes["GET /v1/analyze"];
 
@@ -196,19 +202,31 @@ describe("x402 endpoint policy", () => {
     expect(responseBody?.contentType).toBe("application/json");
     expect(responseBody?.body).toMatchObject({
       x402Version: 2,
-      error: {
-        code: "PAYMENT_REQUIRED",
-        message: "x402 payment required."
+      error: "Payment required",
+      resource: {
+        url: "https://api.callbsman.com/v1/analyze",
+        mimeType: "application/json"
       },
-      resource: "https://api.callbsman.com/v1/analyze",
       accepts: [
         {
           scheme: "exact",
-          network: "eip155:84532",
-          price: "$0.001",
-          payTo: "0x0000000000000000000000000000000000000000"
+          network: "eip155:8453",
+          amount: "1000",
+          asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          payTo: "0x7642CCEd89398Bd638d9Ee2F82dA8cd3FC01ADA1",
+          maxTimeoutSeconds: 60,
+          extra: {
+            name: "Call BS Man API",
+            version: "2",
+            provider: "BS Man AI",
+            category: "Security",
+            tags: expect.arrayContaining(["x402", "AI agents", "AgentCash"])
+          }
         }
       ],
+      extensions: {
+        bazaar: expect.any(Object)
+      },
       metadata: {
         name: "Call BS Man API",
         provider: "BS Man AI",
@@ -217,7 +235,16 @@ describe("x402 endpoint policy", () => {
       }
     });
     expect(getResponseBody?.body).toMatchObject({
-      resource: "https://api.callbsman.com/v1/analyze",
+      x402Version: 2,
+      resource: {
+        url: "https://api.callbsman.com/v1/analyze"
+      },
+      accepts: [
+        {
+          amount: "1000",
+          asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+        }
+      ],
       method: "GET",
       endpoint: "GET https://api.callbsman.com/v1/analyze"
     });

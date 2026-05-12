@@ -121,7 +121,7 @@ Expected outcomes:
 
 - `402 Payment Required` means the x402 challenge path is working.
 - The unpaid GET/POST x402 response should include the `PAYMENT-REQUIRED` header.
-- The unpaid GET/POST x402 response should also include a JSON compatibility body with `x402Version`, `resource`, `accepts`, and public discovery metadata for AgentCash-style API clients. The `PAYMENT-REQUIRED` header remains the canonical x402 payment challenge.
+- The `PAYMENT-REQUIRED` header is canonical. The JSON body mirrors the same PaymentRequired payload for clients that read the body, including `x402Version`, `resource.url`, `accepts[0].amount`, `accepts[0].asset`, and `accepts[0].payTo`.
 - `X402_RUNTIME_ERROR` means the middleware failed before completing the payment challenge. Check the safe server logs for the x402 error name and message.
 - `X402_CONFIG_ERROR` means one or more required x402 environment variables are missing or invalid.
 - If the facilitator reports `Make sure to call initialize()`, the x402 resource server or HTTP resource server must be initialized before serving paid endpoints. BS Man AI initializes the x402 payment middleware once before the first paid `POST /v1/analyze` request.

@@ -46,7 +46,7 @@ Payment details:
 5. AgentCash retries the request with payment proof.
 6. BS Man AI returns the normal JSON analysis response.
 
-For compatibility with AgentCash-style API clients, the unpaid 402 response also includes a JSON body with `x402Version`, `resource`, `accepts`, and public service metadata. The `PAYMENT-REQUIRED` header is still the canonical x402 payment challenge.
+The `PAYMENT-REQUIRED` header is canonical. The JSON body mirrors the same PaymentRequired payload for clients that read the body, including `x402Version`, `resource.url`, `accepts[0].amount`, `accepts[0].asset`, and `accepts[0].payTo`.
 
 Payment settles only on a successful paid request. If the request is not paid or the wallet cannot satisfy the payment requirement, the API should not return the paid analysis response.
 
