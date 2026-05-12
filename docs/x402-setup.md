@@ -36,6 +36,9 @@ Free endpoints:
 
 - `GET /`
 - `GET /health`
+- `GET /openapi.json`
+- `GET /openapi.yaml`
+- `GET /docs/openapi.json`
 - `GET /docs/openapi.yaml`
 
 Paid endpoint when `X402_ENABLED=true`:
@@ -87,7 +90,7 @@ Mappings:
 5. Request `GET /v1/analyze` and `POST /v1/analyze` without payment and confirm `402 Payment Required`.
 6. Retry with an x402-compatible client and testnet wallet.
 7. Confirm the final response is the normal BS Man Risk API JSON.
-8. Confirm `GET /`, `GET /health`, and `GET /docs/openapi.yaml` remain free.
+8. Confirm `GET /`, `GET /health`, `GET /openapi.json`, `GET /openapi.yaml`, and `GET /docs/openapi.yaml` remain free.
 
 ## Local Diagnostic Reproducer
 

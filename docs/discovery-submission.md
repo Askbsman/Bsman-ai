@@ -47,13 +47,16 @@ https://bsman-ai.onrender.com/v1/analyze
 ```text
 GET https://api.callbsman.com/
 GET https://api.callbsman.com/health
+GET https://api.callbsman.com/openapi.json
+GET https://api.callbsman.com/openapi.yaml
 GET https://api.callbsman.com/docs/openapi.yaml
 ```
 
 ## Documentation Links
 
 - Website/docs: `https://callbsman.com`
-- OpenAPI: `https://api.callbsman.com/docs/openapi.yaml`
+- OpenAPI JSON: `https://api.callbsman.com/openapi.json`
+- OpenAPI YAML: `https://api.callbsman.com/openapi.yaml`
 - GitHub: `https://github.com/Askbsman/Bsman-ai`
 - Bazaar metadata: `docs/bazaar-metadata.json`
 - Bazaar listing draft: `docs/bazaar-listing.md`
@@ -227,7 +230,8 @@ Call BS Man API is an x402-paid Conversation Risk Intelligence API for AI agents
 - Paid discovery probe: `GET https://api.callbsman.com/v1/analyze`
 - Paid resource: `POST https://api.callbsman.com/v1/analyze`
 - Fallback resource: `https://bsman-ai.onrender.com/v1/analyze`
-- Free OpenAPI endpoint: `https://api.callbsman.com/docs/openapi.yaml`
+- Free OpenAPI JSON endpoint: `https://api.callbsman.com/openapi.json`
+- Free OpenAPI YAML endpoint: `https://api.callbsman.com/openapi.yaml`
 - x402 network: Base mainnet
 - Price: `$0.001` per analyze request
 - Current facilitator: xpay facilitator

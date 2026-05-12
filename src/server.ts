@@ -1,10 +1,14 @@
 import { serve } from "@hono/node-server";
 import { readFile } from "node:fs/promises";
-import type { MiddlewareHandler } from "hono";
+import type { Context, MiddlewareHandler } from "hono";
 import { Hono } from "hono";
 import { analyzeRoute } from "./routes/analyze.js";
 import { createX402Middleware } from "./middleware/x402.js";
 import type { X402Config } from "./config/x402.js";
+import {
+  openApiJsonDocument,
+  serviceDiscoveryMetadata
+} from "./config/service-discovery.js";
 import { internalError } from "./utils/api-error.js";
 
 type CreateAppOptions = {
@@ -19,18 +23,7 @@ export function createApp(options: CreateAppOptions = {}) {
 
   app.use("*", options.x402Middleware ?? createX402Middleware(options.x402Config));
 
-  app.get("/", (c) =>
-    c.json({
-      name: "BS Man AI",
-      description: "Conversation Risk Intelligence API for AI agents.",
-      version: "0.1.0",
-      endpoints: {
-        health: "/health",
-        analyze: "/v1/analyze",
-        openapi: "/docs/openapi.yaml"
-      }
-    })
-  );
+  app.get("/", (c) => c.json(serviceDiscoveryMetadata));
 
   app.get("/health", (c) =>
     c.json({
@@ -40,12 +33,18 @@ export function createApp(options: CreateAppOptions = {}) {
     })
   );
 
-  app.get("/docs/openapi.yaml", async (c) => {
+  const serveOpenApiYaml = async (c: Context) => {
     const openapi = await readFile("docs/openapi.yaml", "utf8");
     return c.text(openapi, 200, {
       "content-type": "text/yaml; charset=utf-8"
     });
-  });
+  };
+  const serveOpenApiJson = (c: Context) => c.json(openApiJsonDocument);
+
+  app.get("/docs/openapi.yaml", serveOpenApiYaml);
+  app.get("/openapi.yaml", serveOpenApiYaml);
+  app.get("/docs/openapi.json", serveOpenApiJson);
+  app.get("/openapi.json", serveOpenApiJson);
 
   app.route("/v1", analyzeRoute);
 

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-AgentCash is an x402-focused wallet and CLI tool for discovering paid endpoints, inspecting payment requirements, and making agent payments. BS Man AI can use it as a buyer-side smoke-test tool for `POST /v1/analyze` after x402 payment enforcement is enabled.
+AgentCash is an x402-focused wallet and CLI tool for discovering paid endpoints, inspecting payment requirements, and making agent payments. BS Man AI can use it as a buyer-side smoke-test tool for `POST /v1/analyze` after x402 payment enforcement is enabled. The API root and `https://api.callbsman.com/openapi.json` expose agent-friendly discovery metadata for buyer tools.
 
 This document does not add secrets and does not require private keys in the BS Man AI repository.
 

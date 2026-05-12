@@ -27,9 +27,12 @@ https://bsman-ai.onrender.com
 Discovery references:
 
 - Bazaar metadata: `docs/bazaar-metadata.json`
-- OpenAPI: `https://api.callbsman.com/docs/openapi.yaml`
+- OpenAPI JSON: `https://api.callbsman.com/openapi.json`
+- OpenAPI YAML: `https://api.callbsman.com/openapi.yaml`
 - Resource URL: `https://api.callbsman.com/v1/analyze`
 - Fallback resource URL: `https://bsman-ai.onrender.com/v1/analyze`
+
+The API root at `https://api.callbsman.com/` returns agent-friendly resource metadata, including the paid analyze resource, sample endpoints, x402 payment details, and OpenAPI links.
 
 ## Unpaid Request
 
@@ -54,6 +57,8 @@ curl -i https://api.callbsman.com/v1/analyze
 ```
 
 When x402 is enabled, unpaid `GET /v1/analyze` also returns `402 Payment Required` with the `PAYMENT-REQUIRED` header. After a verified paid GET, the endpoint returns lightweight capability JSON. It does not run analysis; use paid `POST /v1/analyze` for risk analysis.
+
+The `PAYMENT-REQUIRED` header is canonical. The JSON body mirrors the same PaymentRequired payload for clients that read the body, including `x402Version`, `resource.url`, `accepts[0].amount`, `accepts[0].asset`, and `accepts[0].payTo`.
 
 ## Paid Request With AgentCash
 

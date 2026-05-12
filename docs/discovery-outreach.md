@@ -97,10 +97,12 @@ Known AgentCash discovery expectations:
 
 Current BS Man AI status:
 
-- OpenAPI is available at `https://api.callbsman.com/docs/openapi.yaml`.
+- The API root at `https://api.callbsman.com/` returns agent-friendly resource metadata, including the paid analyze resource, sample endpoints, x402 payment details, and OpenAPI links.
+- OpenAPI JSON is available at `https://api.callbsman.com/openapi.json`.
+- OpenAPI YAML is available at `https://api.callbsman.com/openapi.yaml` and `https://api.callbsman.com/docs/openapi.yaml`.
 - Runtime x402 paid request has previously succeeded through AgentCash.
 - The `PAYMENT-REQUIRED` header is canonical. The JSON body mirrors the same PaymentRequired payload for clients that read the body.
-- A canonical `/openapi.json` endpoint and AgentCash-specific `x-payment-info` annotations may improve discoverability later.
+- AgentCash-specific `x-payment-info` annotations may improve discoverability later.
 
 Attempted check:
 
@@ -156,7 +158,7 @@ Output: structured JSON with `risk_score`, `risk_level`, `detected_patterns`, `r
 
 Docs: `https://callbsman.com`
 
-OpenAPI: `https://api.callbsman.com/docs/openapi.yaml`
+OpenAPI: `https://api.callbsman.com/openapi.json`
 
 GitHub: `https://github.com/Askbsman/Bsman-ai`
 
@@ -216,7 +218,7 @@ This is designed for agent preflight checks before payments, wallet actions, lin
 
 Docs: `https://callbsman.com`
 
-OpenAPI: `https://api.callbsman.com/docs/openapi.yaml`
+OpenAPI: `https://api.callbsman.com/openapi.json`
 
 ## Telegram Launch Post
 

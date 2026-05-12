@@ -108,16 +108,48 @@ describe("service endpoints", () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body).toEqual({
+    expect(body).toMatchObject({
       name: "BS Man AI",
+      service: "Call BS Man API",
       description: "Conversation Risk Intelligence API for AI agents.",
       version: "0.1.0",
+      docs: "https://callbsman.com",
+      openapi: "https://api.callbsman.com/openapi.json",
       endpoints: {
         health: "/health",
         analyze: "/v1/analyze",
-        openapi: "/docs/openapi.yaml"
-      }
+        analyze_probe: "/v1/analyze",
+        openapi: "/openapi.json",
+        openapi_json: "/openapi.json",
+        openapi_yaml: "/openapi.yaml"
+      },
+      resources: [
+        {
+          name: "Call BS Man API Analyze",
+          url: "https://api.callbsman.com/v1/analyze",
+          path: "/v1/analyze",
+          methods: ["GET", "POST"],
+          primary_method: "POST",
+          payment: {
+            protocol: "x402",
+            network: "Base mainnet",
+            price: "$0.001 per analyze request"
+          },
+          request: {
+            mode: "agent_action_check"
+          }
+        }
+      ]
     });
+    expect(body.sample_endpoints).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          method: "POST",
+          url: "https://api.callbsman.com/v1/analyze",
+          price: "$0.001"
+        })
+      ])
+    );
   });
 
   test("GET /docs/openapi.yaml serves the OpenAPI document", async () => {
@@ -128,6 +160,33 @@ describe("service endpoints", () => {
     expect(response.headers.get("content-type")).toContain("text/yaml");
     expect(body).toContain("/health:");
     expect(body).toContain("/v1/analyze:");
+  });
+
+  test("GET OpenAPI aliases serve JSON and YAML documents", async () => {
+    const jsonResponse = await app.request("/openapi.json");
+    const docsJsonResponse = await app.request("/docs/openapi.json");
+    const yamlResponse = await app.request("/openapi.yaml");
+    const jsonBody = await jsonResponse.json();
+    const docsJsonBody = await docsJsonResponse.json();
+    const yamlBody = await yamlResponse.text();
+
+    expect(jsonResponse.status).toBe(200);
+    expect(docsJsonResponse.status).toBe(200);
+    expect(yamlResponse.status).toBe(200);
+    expect(jsonResponse.headers.get("content-type")).toContain("application/json");
+    expect(docsJsonResponse.headers.get("content-type")).toContain(
+      "application/json"
+    );
+    expect(yamlResponse.headers.get("content-type")).toContain("text/yaml");
+    expect(jsonBody.openapi).toBe("3.1.0");
+    expect(jsonBody.paths["/v1/analyze"].post["x-x402"]).toMatchObject({
+      payment: "x402",
+      resource: "https://api.callbsman.com/v1/analyze"
+    });
+    expect(docsJsonBody.paths["/v1/analyze"].get.summary).toContain(
+      "discovery"
+    );
+    expect(yamlBody).toContain("/v1/analyze:");
   });
 });
 
@@ -362,6 +421,7 @@ describe("x402 endpoint policy", () => {
     const rootResponse = await protectedApp.request("/");
     const healthResponse = await protectedApp.request("/health");
     const docsResponse = await protectedApp.request("/docs/openapi.yaml");
+    const openApiJsonResponse = await protectedApp.request("/openapi.json");
     const analyzeGetResponse = await protectedApp.request("/v1/analyze");
     const analyzeResponse = await protectedApp.request("/v1/analyze", {
       method: "POST",
@@ -377,6 +437,7 @@ describe("x402 endpoint policy", () => {
     expect(rootResponse.status).toBe(200);
     expect(healthResponse.status).toBe(200);
     expect(docsResponse.status).toBe(200);
+    expect(openApiJsonResponse.status).toBe(200);
     expect(analyzeGetResponse.status).toBe(402);
     expect(analyzeResponse.status).toBe(402);
     expect(analyzeGetBody.error.code).toBe("PAYMENT_REQUIRED");
@@ -622,12 +683,16 @@ describe("x402 endpoint policy", () => {
     const rootResponse = await initializedApp.request("/");
     const healthResponse = await initializedApp.request("/health");
     const docsResponse = await initializedApp.request("/docs/openapi.yaml");
+    const openApiJsonResponse = await initializedApp.request("/openapi.json");
+    const openApiYamlResponse = await initializedApp.request("/openapi.yaml");
 
     infoSpy.mockRestore();
     warnSpy.mockRestore();
     expect(rootResponse.status).toBe(200);
     expect(healthResponse.status).toBe(200);
     expect(docsResponse.status).toBe(200);
+    expect(openApiJsonResponse.status).toBe(200);
+    expect(openApiYamlResponse.status).toBe(200);
     expect(initializeCalls).toBe(0);
   });
 
