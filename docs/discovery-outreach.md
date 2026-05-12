@@ -99,6 +99,7 @@ Current BS Man AI status:
 
 - OpenAPI is available at `https://api.callbsman.com/docs/openapi.yaml`.
 - Runtime x402 paid request has previously succeeded through AgentCash.
+- Unpaid `GET /v1/analyze` and `POST /v1/analyze` responses include the canonical `PAYMENT-REQUIRED` header plus a JSON compatibility body for AgentCash-style API clients.
 - A canonical `/openapi.json` endpoint and AgentCash-specific `x-payment-info` annotations may improve discoverability later.
 
 Attempted check:

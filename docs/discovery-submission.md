@@ -68,6 +68,7 @@ GET https://api.callbsman.com/docs/openapi.yaml
 - Paid analysis endpoint: `POST /v1/analyze`
 - MIME type: `application/json`
 - Current facilitator: xpay facilitator on Base mainnet
+- Unpaid 402 response: canonical `PAYMENT-REQUIRED` header plus JSON compatibility body for AgentCash-style API clients
 
 ## Discovery And Indexing Note
 

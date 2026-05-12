@@ -163,6 +163,67 @@ describe("x402 endpoint policy", () => {
     expect(getRoute.mimeType).toBe("application/json");
   });
 
+  test("x402 unpaid response body includes AgentCash-compatible fallback metadata", async () => {
+    const routes = createX402AnalyzeRoutes(validX402Config);
+    const route = routes["POST /v1/analyze"];
+    const getRoute = routes["GET /v1/analyze"];
+
+    const responseBody = await route.unpaidResponseBody?.({
+      adapter: {
+        getHeader: () => undefined,
+        getMethod: () => "POST",
+        getPath: () => "/v1/analyze",
+        getUrl: () => "https://api.callbsman.com/v1/analyze",
+        getAcceptHeader: () => "application/json",
+        getUserAgent: () => "agentcash"
+      },
+      method: "POST",
+      path: "/v1/analyze"
+    });
+    const getResponseBody = await getRoute.unpaidResponseBody?.({
+      adapter: {
+        getHeader: () => undefined,
+        getMethod: () => "GET",
+        getPath: () => "/v1/analyze",
+        getUrl: () => "https://api.callbsman.com/v1/analyze",
+        getAcceptHeader: () => "application/json",
+        getUserAgent: () => "agentcash"
+      },
+      method: "GET",
+      path: "/v1/analyze"
+    });
+
+    expect(responseBody?.contentType).toBe("application/json");
+    expect(responseBody?.body).toMatchObject({
+      x402Version: 2,
+      error: {
+        code: "PAYMENT_REQUIRED",
+        message: "x402 payment required."
+      },
+      resource: "https://api.callbsman.com/v1/analyze",
+      accepts: [
+        {
+          scheme: "exact",
+          network: "eip155:84532",
+          price: "$0.001",
+          payTo: "0x0000000000000000000000000000000000000000"
+        }
+      ],
+      metadata: {
+        name: "Call BS Man API",
+        provider: "BS Man AI",
+        description: "Conversation Risk Intelligence API for AI agents.",
+        openApiUrl: "https://api.callbsman.com/docs/openapi.yaml"
+      }
+    });
+    expect(getResponseBody?.body).toMatchObject({
+      resource: "https://api.callbsman.com/v1/analyze",
+      method: "GET",
+      endpoint: "GET https://api.callbsman.com/v1/analyze"
+    });
+    expectSafeError(responseBody?.body);
+  });
+
   test("canonical Bazaar metadata uses the public API endpoint and product details", () => {
     expect(bazaarDiscoveryMetadata.name).toBe("Call BS Man API");
     expect(bazaarDiscoveryMetadata.provider).toBe("BS Man AI");

@@ -4,19 +4,6 @@ Conversation Risk Intelligence API for AI agents.
 
 BS Man AI provides the **BS Man Risk API**, an English-only risk analysis endpoint for messages, offers, dialogues, and proposed AI-agent actions. It helps agents spot scam signals, manipulation tactics, pressure patterns, unsafe payment steps, wallet risks, and suspicious next actions before they proceed.
 
-## Live status
-
-- Landing: https://callbsman.com
-- API: https://api.callbsman.com
-- Analyze endpoint: POST https://api.callbsman.com/v1/analyze
-- OpenAPI: https://api.callbsman.com/docs/openapi.yaml
-- Fallback API: https://bsman-ai.onrender.com
-- GitHub: https://github.com/Askbsman/Bsman-ai
-- Payment: x402
-- Network: Base mainnet
-- Price: `$0.001` per analyze request
-- AgentCash paid request: tested successfully
-
 ## Live API
 
 ```text
@@ -43,6 +30,15 @@ Payment:
 - Main mode: `agent_action_check`
 - Public status: live
 - Stage 1.0 evidence: successful AgentCash paid request, with transaction details recorded in `docs/stage-1-paid-request-result.md`
+
+Discovery metadata:
+
+- Bazaar metadata: `docs/bazaar-metadata.json`
+- Bazaar listing: `docs/bazaar-listing.md`
+- OpenAPI: `https://api.callbsman.com/docs/openapi.yaml`
+- Resource URL: `https://api.callbsman.com/v1/analyze`
+
+BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Official Coinbase Bazaar auto-indexing may require CDP Facilitator settlement. The current production endpoint uses xpay facilitator on Base mainnet because CDP onboarding is not available in the current setup.
 
 Free endpoints:
 
@@ -76,6 +72,8 @@ Expected result:
 ```text
 HTTP/2 402
 ```
+
+The unpaid response includes the canonical x402 `PAYMENT-REQUIRED` header and a small JSON compatibility body for AgentCash-style API clients.
 
 ## AgentCash Paid Request
 

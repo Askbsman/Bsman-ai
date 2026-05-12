@@ -1,4 +1,8 @@
-import { HTTPFacilitatorClient } from "@x402/core/server";
+import {
+  HTTPFacilitatorClient,
+  type HTTPRequestContext,
+  type HTTPResponseBody
+} from "@x402/core/server";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { bazaarResourceServerExtension } from "@x402/extensions";
 import {
@@ -28,6 +32,68 @@ function noopMiddleware(): MiddlewareHandler {
 
 function price(value: string): string {
   return value.startsWith("$") ? value : `$${value}`;
+}
+
+export function createX402PaymentRequiredBody(
+  config: X402Config,
+  context: Pick<HTTPRequestContext, "method" | "path">
+) {
+  const requestMethod = context.method.toUpperCase();
+  const publicPrice = price(config.analyzePriceUsd);
+
+  return {
+    x402Version: 2,
+    error: {
+      code: "PAYMENT_REQUIRED",
+      message: "x402 payment required.",
+      details: {
+        paymentRequiredHeader: "PAYMENT-REQUIRED",
+        headerIsCanonical: true,
+        hint:
+          "Read the PAYMENT-REQUIRED header for the canonical x402 payment challenge. This JSON body is a compatibility fallback for API clients."
+      }
+    },
+    resource: bazaarDiscoveryMetadata.resourceUrl,
+    method: requestMethod,
+    endpoint: `${requestMethod} ${bazaarDiscoveryMetadata.resourceUrl}`,
+    accepts: [
+      {
+        scheme: "exact",
+        network: config.network,
+        price: publicPrice,
+        payTo: config.payTo,
+        maxTimeoutSeconds: 60
+      }
+    ],
+    payment: {
+      protocol: bazaarDiscoveryMetadata.payment.protocol,
+      network: bazaarDiscoveryMetadata.payment.network,
+      networkId: config.network,
+      price: `${publicPrice} ${bazaarDiscoveryMetadata.payment.unit}`,
+      facilitator: "configured x402 facilitator"
+    },
+    metadata: {
+      name: bazaarDiscoveryMetadata.name,
+      provider: bazaarDiscoveryMetadata.provider,
+      category: bazaarDiscoveryMetadata.category,
+      description: "Conversation Risk Intelligence API for AI agents.",
+      mimeType: bazaarDiscoveryMetadata.mimeType,
+      docsUrl: bazaarDiscoveryMetadata.docsUrl,
+      openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
+      githubUrl: bazaarDiscoveryMetadata.githubUrl,
+      mainMode: bazaarDiscoveryMetadata.mainMode,
+      supportedModes: [...bazaarDiscoveryMetadata.supportedModes],
+      tags: [...bazaarDiscoveryMetadata.tags],
+      fallbackUrl: bazaarDiscoveryMetadata.fallbackUrl
+    }
+  };
+}
+
+function createUnpaidResponseBody(config: X402Config) {
+  return (context: HTTPRequestContext): HTTPResponseBody => ({
+    contentType: "application/json",
+    body: createX402PaymentRequiredBody(config, context)
+  });
 }
 
 type ProtectedPaymentMiddleware = {
@@ -132,7 +198,8 @@ export function createX402AnalyzeRoutes(config: X402Config) {
     resource: bazaarDiscoveryMetadata.resourceUrl,
     description:
       "Conversation Risk Intelligence API for AI agents. Call BS Man API analyzes chats, offers, and proposed agent actions for scam signals, manipulation tactics, unsafe payment requests, wallet/payment risk, and risky next steps.",
-    mimeType: bazaarDiscoveryMetadata.mimeType
+    mimeType: bazaarDiscoveryMetadata.mimeType,
+    unpaidResponseBody: createUnpaidResponseBody(config)
   };
 
   return {

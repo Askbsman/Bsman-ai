@@ -40,11 +40,13 @@ Payment details:
 ## Expected Behavior
 
 1. AgentCash calls the endpoint.
-2. The API returns `402 Payment Required`.
+2. The API returns `402 Payment Required` with the `PAYMENT-REQUIRED` header.
 3. AgentCash reads the x402 payment requirement.
 4. AgentCash pays from the configured wallet.
 5. AgentCash retries the request with payment proof.
 6. BS Man AI returns the normal JSON analysis response.
+
+For compatibility with AgentCash-style API clients, the unpaid 402 response also includes a JSON body with `x402Version`, `resource`, `accepts`, and public service metadata. The `PAYMENT-REQUIRED` header is still the canonical x402 payment challenge.
 
 Payment settles only on a successful paid request. If the request is not paid or the wallet cannot satisfy the payment requirement, the API should not return the paid analysis response.
 
