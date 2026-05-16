@@ -180,6 +180,13 @@ a{ color: inherit; text-decoration: none; }
 .btn--text:hover{ color: var(--amber); }
 
 .header-cta{ font-size: 13px; padding: 9px 16px; }
+.promo-trigger{
+  font-size: 13px;
+  padding: 9px 15px;
+}
+.main-nav .promo-trigger{
+  margin-left: 2px;
+}
 
 .menu-toggle{
   display: none;
@@ -1288,6 +1295,79 @@ a{ color: inherit; text-decoration: none; }
 }
 .mobile-nav a:hover{ color: var(--amber); }
 .mobile-nav .btn{ margin-top: 18px; justify-content: center; }
+
+/* Promo video modal */
+.promo-modal{
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.promo-modal.open{ display: flex; }
+.promo-modal__backdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.78);
+  backdrop-filter: blur(10px);
+}
+.promo-modal__panel{
+  position: relative;
+  width: min(960px, 100%);
+  border: 1px solid rgba(240,185,11,.28);
+  border-radius: 14px;
+  background: #07080B;
+  box-shadow: 0 26px 80px rgba(0,0,0,.55);
+  overflow: hidden;
+}
+.promo-modal__top{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.promo-modal__title{
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+.promo-modal__close{
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  background: rgba(255,255,255,.04);
+  color: var(--offwhite);
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+.promo-modal__close:hover{
+  color: var(--amber);
+  border-color: rgba(240,185,11,.38);
+}
+.promo-modal video{
+  display: block;
+  width: 100%;
+  max-height: min(72vh, 720px);
+  background: #000;
+}
+body.promo-open{ overflow: hidden; }
+@media (max-width: 640px){
+  .promo-modal{ padding: 14px; }
+  .promo-modal__top{ padding: 12px; }
+  .promo-modal__title{ font-size: 12px; }
+}
 </style>
 </head>
 <body>
@@ -1304,6 +1384,7 @@ a{ color: inherit; text-decoration: none; }
       <a href="#examples">Examples</a>
       <a href="#x402">x402</a>
       <a href="#pricing">Pricing</a>
+      <button type="button" class="btn btn--ghost promo-trigger" data-open-promo aria-haspopup="dialog">Promo</button>
       <a href="https://github.com/Askbsman/Bsman-ai" target="_blank" rel="noopener">GitHub</a>
     </nav>
     <a href="#api" class="btn btn--primary header-cta">Try the API →</a>
@@ -1317,6 +1398,7 @@ a{ color: inherit; text-decoration: none; }
   <a href="#examples">Examples</a>
   <a href="#x402">x402</a>
   <a href="#pricing">Pricing</a>
+  <button type="button" class="btn btn--ghost promo-trigger" data-open-promo aria-haspopup="dialog">Promo</button>
   <a href="https://github.com/Askbsman/Bsman-ai" target="_blank" rel="noopener">GitHub</a>
   <a href="#api" class="btn btn--primary">Try the API →</a>
 </nav>
@@ -1336,6 +1418,7 @@ a{ color: inherit; text-decoration: none; }
       <p class="hero-body">BS Man AI analyzes chats, offers, and proposed agent actions to detect scams, manipulation, and unsafe decisions before agents pay, click, sign, reply, or proceed. Today it is a live API for agent builders; direct user chat is coming later.</p>
       <div class="cta-row">
         <a href="#api" class="btn btn--primary">Try the API →</a>
+        <button type="button" class="btn btn--ghost" data-open-promo aria-haspopup="dialog">Promo</button>
         <a href="https://github.com/Askbsman/Bsman-ai" target="_blank" rel="noopener" class="btn btn--ghost">View Docs</a>
         <a href="#x402" class="btn btn--text">Check with AgentCash ↗</a>
       </div>
@@ -1851,6 +1934,21 @@ a{ color: inherit; text-decoration: none; }
   <div>bsman.ai — agent coming next</div>
 </footer>
 
+<div class="promo-modal" id="promoModal" role="dialog" aria-modal="true" aria-labelledby="promoTitle" aria-hidden="true">
+  <div class="promo-modal__backdrop" data-close-promo></div>
+  <div class="promo-modal__panel">
+    <div class="promo-modal__top">
+      <p class="promo-modal__title" id="promoTitle">BS Man AI Promo</p>
+      <button type="button" class="promo-modal__close" data-close-promo aria-label="Close promo video">&times;</button>
+    </div>
+    <video id="promoVideo" controls playsinline preload="metadata">
+      <source src="assets/bspromo.MOV" type="video/quicktime" />
+      <source src="assets/bspromo.MOV" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  </div>
+</div>
+
 <script>
 // Mobile menu toggle
 (function(){
@@ -1862,6 +1960,43 @@ a{ color: inherit; text-decoration: none; }
   });
   nav.querySelectorAll('a').forEach(function(a){
     a.addEventListener('click', function(){ nav.classList.remove('open'); });
+  });
+})();
+
+// Promo video modal
+(function(){
+  var modal = document.getElementById('promoModal');
+  var video = document.getElementById('promoVideo');
+  var openers = document.querySelectorAll('[data-open-promo]');
+  var closers = document.querySelectorAll('[data-close-promo]');
+  if(!modal || !openers.length) return;
+
+  function openPromo(){
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('promo-open');
+    if(video){
+      video.currentTime = 0;
+      var playPromise = video.play();
+      if(playPromise && playPromise.catch) playPromise.catch(function(){});
+    }
+  }
+
+  function closePromo(){
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('promo-open');
+    if(video) video.pause();
+  }
+
+  openers.forEach(function(btn){
+    btn.addEventListener('click', openPromo);
+  });
+  closers.forEach(function(btn){
+    btn.addEventListener('click', closePromo);
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && modal.classList.contains('open')) closePromo();
   });
 })();
 
