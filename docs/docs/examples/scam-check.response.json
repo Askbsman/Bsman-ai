@@ -1,0 +1,42 @@
+{
+  "mode": "scam_check",
+  "risk_score": 97,
+  "risk_level": "critical",
+  "summary": "Critical communication risk detected across 2 pattern(s). Treat the message as unsafe until independently verified.",
+  "detected_patterns": [
+    {
+      "id": "SCAM_WALLET_SEED_PHRASE_THEFT",
+      "name": "Wallet seed phrase theft",
+      "category": "credential_theft",
+      "weight": 74,
+      "matched_phrases": [
+        "seed phrase",
+        "enter your seed phrase",
+        "wallet is suspended"
+      ],
+      "confidence": 0.83,
+      "evidence_snippet": "Click this urgent link and enter your seed phrase."
+    },
+    {
+      "id": "SCAM_PHISHING_LINK",
+      "name": "Phishing link",
+      "category": "phishing",
+      "weight": 48,
+      "matched_phrases": [
+        "click this urgent link"
+      ],
+      "confidence": 0.74,
+      "evidence_snippet": "Your wallet is suspended. Click this urgent link and enter your seed phrase."
+    }
+  ],
+  "red_flags": [
+    "Uses a link to request sensitive information.",
+    "Creates urgency around account access.",
+    "Requests a seed phrase or private wallet credential.",
+    "No legitimate support process needs wallet recovery words.",
+    "Requests a risky payment method, credential, or verification code."
+  ],
+  "recommended_action": "Do not send money or credentials. Verify through an official channel before continuing.",
+  "safe_reply": null,
+  "disclaimer": "BS Man Risk API analyzes communication risk signals only. It is not legal advice, financial advice, a lie detector, or a guarantee that something is true or false."
+}

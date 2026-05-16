@@ -29,6 +29,8 @@ Payment details:
 - Asset: USDC
 - Price: `$0.001`
 - Mode: `agent_action_check`
+- Landing: `https://callbsman.com`
+- OpenAPI: `https://api.callbsman.com/docs/openapi.yaml`
 
 ## Requirements
 
@@ -40,13 +42,11 @@ Payment details:
 ## Expected Behavior
 
 1. AgentCash calls the endpoint.
-2. The API returns `402 Payment Required` with the `PAYMENT-REQUIRED` header.
+2. The API returns `402 Payment Required`.
 3. AgentCash reads the x402 payment requirement.
 4. AgentCash pays from the configured wallet.
 5. AgentCash retries the request with payment proof.
 6. BS Man AI returns the normal JSON analysis response.
-
-The `PAYMENT-REQUIRED` header is canonical. The JSON body mirrors the same PaymentRequired payload for clients that read the body, including `x402Version`, `resource.url`, `accepts[0].amount`, `accepts[0].asset`, and `accepts[0].payTo`.
 
 Payment settles only on a successful paid request. If the request is not paid or the wallet cannot satisfy the payment requirement, the API should not return the paid analysis response.
 

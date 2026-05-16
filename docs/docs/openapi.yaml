@@ -3,21 +3,11 @@ info:
   title: BS Man Risk API
   version: 0.1.0
   description: Conversation Risk Intelligence API for AI agents.
-  x-bazaar-metadata:
-    name: Call BS Man API
-    provider: BS Man AI
-    category: Security
-    resourceUrl: https://api.callbsman.com/v1/analyze
-    docsUrl: https://callbsman.com
-    githubUrl: https://github.com/Askbsman/Bsman-ai
-    cdpIndexingLimitation: BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Official Coinbase Bazaar auto-indexing may require CDP Facilitator settlement. The current production endpoint uses xpay facilitator on Base mainnet because CDP onboarding is not available in the current setup.
 servers:
   - url: https://api.callbsman.com
     description: Primary production API
   - url: https://bsman-ai.onrender.com
     description: Render fallback endpoint
-  - url: http://localhost:3000
-    description: Local development
 paths:
   /:
     get:
@@ -44,17 +34,6 @@ paths:
   /docs/openapi.yaml:
     get:
       summary: OpenAPI YAML
-      operationId: getDocsOpenApiYaml
-      responses:
-        "200":
-          description: OpenAPI document in YAML format.
-          content:
-            text/yaml:
-              schema:
-                type: string
-  /openapi.yaml:
-    get:
-      summary: OpenAPI YAML
       operationId: getOpenApiYaml
       responses:
         "200":
@@ -63,85 +42,10 @@ paths:
             text/yaml:
               schema:
                 type: string
-  /docs/openapi.json:
-    get:
-      summary: OpenAPI JSON
-      operationId: getDocsOpenApiJson
-      responses:
-        "200":
-          description: OpenAPI document in JSON format.
-          content:
-            application/json:
-              schema:
-                type: object
-  /openapi.json:
-    get:
-      summary: OpenAPI JSON
-      operationId: getOpenApiJson
-      responses:
-        "200":
-          description: OpenAPI document in JSON format.
-          content:
-            application/json:
-              schema:
-                type: object
   /v1/analyze:
-    get:
-      summary: Paid x402 discovery/capability probe
-      operationId: getAnalyzeCapability
-      x-x402:
-        payment: x402
-        network: Base mainnet
-        price: "$0.001"
-        resource: https://api.callbsman.com/v1/analyze
-        fallback: https://bsman-ai.onrender.com/v1/analyze
-        mimeType: application/json
-        mainMode: agent_action_check
-        bazaarMetadata: docs/bazaar-metadata.json
-      x-payment-info:
-        price:
-          mode: fixed
-          currency: USD
-          amount: "0.001000"
-        protocols:
-          - x402: {}
-      responses:
-        "200":
-          description: Capability JSON after verified x402 payment.
-          content:
-            application/json:
-              schema:
-                type: object
-        "402":
-          description: Payment Required
-          headers:
-            PAYMENT-REQUIRED:
-              description: Base64url encoded x402 PaymentRequired payload.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                type: object
     post:
       summary: Analyze communication risk signals
       operationId: analyzeConversationRisk
-      x-x402:
-        payment: x402
-        network: Base mainnet
-        price: "$0.001"
-        resource: https://api.callbsman.com/v1/analyze
-        fallback: https://bsman-ai.onrender.com/v1/analyze
-        mimeType: application/json
-        mainMode: agent_action_check
-        bazaarMetadata: docs/bazaar-metadata.json
-      x-payment-info:
-        price:
-          mode: fixed
-          currency: USD
-          amount: "0.001000"
-        protocols:
-          - x402: {}
       requestBody:
         required: true
         content:
@@ -187,7 +91,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "402":
-          description: Payment Required
+          description: Payment required when x402 protection is enabled.
           content:
             application/json:
               schema:
@@ -204,26 +108,17 @@ components:
       type: object
       required:
         - name
-        - service
         - description
         - version
         - endpoints
-        - resources
       properties:
         name:
           type: string
           const: BS Man AI
-        service:
-          type: string
-          const: Call BS Man API
         description:
           type: string
           const: Conversation Risk Intelligence API for AI agents.
         version:
-          type: string
-        docs:
-          type: string
-        openapi:
           type: string
         endpoints:
           type: object
@@ -236,42 +131,8 @@ components:
               type: string
             analyze:
               type: string
-            analyze_probe:
-              type: string
             openapi:
               type: string
-            openapi_json:
-              type: string
-            openapi_yaml:
-              type: string
-        resources:
-          type: array
-          items:
-            type: object
-            required:
-              - name
-              - url
-              - methods
-              - payment
-            properties:
-              name:
-                type: string
-              url:
-                type: string
-              path:
-                type: string
-              methods:
-                type: array
-                items:
-                  type: string
-              primary_method:
-                type: string
-              payment:
-                type: object
-        sample_endpoints:
-          type: array
-          items:
-            type: object
     HealthResponse:
       type: object
       required:
@@ -391,17 +252,6 @@ components:
                 - direct
                 - neutral
               description: Safe reply tone. Defaults to calm_firm.
-            include_safe_reply:
-              type: boolean
-              description: Discovery hint for clients. The v0.1 API returns safe_reply for safe_reply mode and null otherwise.
-            include_detected_patterns:
-              type: boolean
-              description: Discovery hint for clients. The v0.1 API always returns detected_patterns.
-            risk_detail_level:
-              type: string
-              enum:
-                - standard
-              description: Discovery hint for clients. The v0.1 API uses standard deterministic detail.
     DetectedPattern:
       type: object
       required:
@@ -519,8 +369,6 @@ components:
                 - VALIDATION_ERROR
                 - UNSUPPORTED_LANGUAGE
                 - INTERNAL_ERROR
-                - X402_CONFIG_ERROR
-                - X402_RUNTIME_ERROR
             message:
               type: string
             details:

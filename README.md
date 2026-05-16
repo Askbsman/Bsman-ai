@@ -31,11 +31,25 @@ Payment:
 - Public status: live
 - Stage 1.0 evidence: successful AgentCash paid request, with transaction details recorded in `docs/stage-1-paid-request-result.md`
 
+Discovery metadata:
+
+- Bazaar metadata: `docs/bazaar-metadata.json`
+- Bazaar listing: `docs/bazaar-listing.md`
+- OpenAPI JSON: `https://api.callbsman.com/openapi.json`
+- OpenAPI YAML: `https://api.callbsman.com/openapi.yaml`
+- Resource URL: `https://api.callbsman.com/v1/analyze`
+
+The API root at `https://api.callbsman.com/` returns agent-friendly resource metadata, including the paid analyze resource, sample endpoints, x402 payment details, and OpenAPI links.
+
+BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Official Coinbase Bazaar auto-indexing may require CDP Facilitator settlement. The current production endpoint uses xpay facilitator on Base mainnet because CDP onboarding is not available in the current setup.
+
 Free endpoints:
 
 ```text
 GET https://api.callbsman.com/
 GET https://api.callbsman.com/health
+GET https://api.callbsman.com/openapi.json
+GET https://api.callbsman.com/openapi.yaml
 GET https://api.callbsman.com/docs/openapi.yaml
 ```
 
@@ -63,6 +77,8 @@ Expected result:
 ```text
 HTTP/2 402
 ```
+
+The `PAYMENT-REQUIRED` header is canonical. The JSON body mirrors the same PaymentRequired payload for clients that read the body, including `x402Version`, `resource.url`, `accepts[0].amount`, `accepts[0].asset`, and `accepts[0].payTo`.
 
 ## AgentCash Paid Request
 

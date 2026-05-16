@@ -1,0 +1,29 @@
+{
+  "mode": "manipulation_check",
+  "risk_score": 46,
+  "risk_level": "medium",
+  "summary": "Some communication risk signals detected across 1 pattern(s). Review details carefully before responding.",
+  "detected_patterns": [
+    {
+      "id": "MANIP_GUILT_TRIPPING",
+      "name": "Guilt-tripping",
+      "category": "emotional_pressure",
+      "weight": 46,
+      "matched_phrases": [
+        "after everything I did",
+        "refusing this proves",
+        "you never cared",
+        "I did for you"
+      ],
+      "confidence": 0.74,
+      "evidence_snippet": "After everything I did for you, refusing this proves you never cared about me."
+    }
+  ],
+  "red_flags": [
+    "Emotional debt framing",
+    "Compliance tied to care"
+  ],
+  "recommended_action": "Slow the conversation down, set a boundary, and ask for verifiable details in writing.",
+  "safe_reply": null,
+  "disclaimer": "BS Man Risk API analyzes communication risk signals only. It is not legal advice, financial advice, a lie detector, or a guarantee that something is true or false."
+}

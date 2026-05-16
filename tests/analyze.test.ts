@@ -1,7 +1,11 @@
 import { describe, expect, test, vi } from "vitest";
 import app, { createApp } from "../src/server.js";
 import type { X402Config } from "../src/config/x402.js";
-import { createX402Middleware } from "../src/middleware/x402.js";
+import { bazaarDiscoveryMetadata } from "../src/config/discovery.js";
+import {
+  createX402AnalyzeRoutes,
+  createX402Middleware
+} from "../src/middleware/x402.js";
 import cases from "./fixtures/test-cases.json" with { type: "json" };
 
 const modes = [
@@ -63,6 +67,12 @@ const validX402Config: X402Config = {
   agentActionPriceUsd: "0.005"
 };
 
+const baseMainnetX402Config: X402Config = {
+  ...validX402Config,
+  network: "eip155:8453",
+  payTo: "0x7642CCEd89398Bd638d9Ee2F82dA8cd3FC01ADA1"
+};
+
 async function requestAnalyzeWithConfig(config: X402Config) {
   const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
   try {
@@ -98,16 +108,48 @@ describe("service endpoints", () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body).toEqual({
+    expect(body).toMatchObject({
       name: "BS Man AI",
+      service: "Call BS Man API",
       description: "Conversation Risk Intelligence API for AI agents.",
       version: "0.1.0",
+      docs: "https://callbsman.com",
+      openapi: "https://api.callbsman.com/openapi.json",
       endpoints: {
         health: "/health",
         analyze: "/v1/analyze",
-        openapi: "/docs/openapi.yaml"
-      }
+        analyze_probe: "/v1/analyze",
+        openapi: "/openapi.json",
+        openapi_json: "/openapi.json",
+        openapi_yaml: "/openapi.yaml"
+      },
+      resources: [
+        {
+          name: "Call BS Man API Analyze",
+          url: "https://api.callbsman.com/v1/analyze",
+          path: "/v1/analyze",
+          methods: ["GET", "POST"],
+          primary_method: "POST",
+          payment: {
+            protocol: "x402",
+            network: "Base mainnet",
+            price: "$0.001 per analyze request"
+          },
+          request: {
+            mode: "agent_action_check"
+          }
+        }
+      ]
     });
+    expect(body.sample_endpoints).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          method: "POST",
+          url: "https://api.callbsman.com/v1/analyze",
+          price: "$0.001"
+        })
+      ])
+    );
   });
 
   test("GET /docs/openapi.yaml serves the OpenAPI document", async () => {
@@ -119,9 +161,205 @@ describe("service endpoints", () => {
     expect(body).toContain("/health:");
     expect(body).toContain("/v1/analyze:");
   });
+
+  test("GET OpenAPI aliases serve JSON and YAML documents", async () => {
+    const jsonResponse = await app.request("/openapi.json");
+    const docsJsonResponse = await app.request("/docs/openapi.json");
+    const yamlResponse = await app.request("/openapi.yaml");
+    const jsonBody = await jsonResponse.json();
+    const docsJsonBody = await docsJsonResponse.json();
+    const yamlBody = await yamlResponse.text();
+
+    expect(jsonResponse.status).toBe(200);
+    expect(docsJsonResponse.status).toBe(200);
+    expect(yamlResponse.status).toBe(200);
+    expect(jsonResponse.headers.get("content-type")).toContain("application/json");
+    expect(docsJsonResponse.headers.get("content-type")).toContain(
+      "application/json"
+    );
+    expect(yamlResponse.headers.get("content-type")).toContain("text/yaml");
+    expect(jsonBody.openapi).toBe("3.1.0");
+    expect(jsonBody.paths["/v1/analyze"].post["x-x402"]).toMatchObject({
+      payment: "x402",
+      resource: "https://api.callbsman.com/v1/analyze"
+    });
+    expect(jsonBody.paths["/v1/analyze"].get["x-payment-info"]).toMatchObject({
+      price: {
+        mode: "fixed",
+        currency: "USD",
+        amount: "0.001000"
+      },
+      protocols: [{ x402: {} }]
+    });
+    expect(jsonBody.paths["/v1/analyze"].post["x-payment-info"]).toMatchObject({
+      price: {
+        mode: "fixed",
+        currency: "USD",
+        amount: "0.001000"
+      },
+      protocols: [{ x402: {} }]
+    });
+    expect(jsonBody.paths["/v1/analyze"].get.responses["402"]).toMatchObject({
+      description: "Payment Required"
+    });
+    expect(jsonBody.paths["/v1/analyze"].post.responses["402"]).toMatchObject({
+      description: "Payment Required"
+    });
+    expect(docsJsonBody.paths["/v1/analyze"].get.summary).toContain(
+      "discovery"
+    );
+    expect(yamlBody).toContain("/v1/analyze:");
+    expect(yamlBody).toContain("x-payment-info:");
+    expect(yamlBody).toContain('amount: "0.001000"');
+  });
 });
 
 describe("x402 endpoint policy", () => {
+  test("x402 analyze route config exposes Bazaar-compatible discovery metadata", () => {
+    const routes = createX402AnalyzeRoutes(validX402Config);
+    const route = routes["POST /v1/analyze"];
+    const getRoute = routes["GET /v1/analyze"];
+
+    expect(route.resource).toBe("https://api.callbsman.com/v1/analyze");
+    expect(route.description).toContain(
+      "Conversation Risk Intelligence API for AI agents"
+    );
+    expect(route.mimeType).toBe("application/json");
+    expect(route.accepts).toMatchObject({
+      extra: {
+        bsman: {
+          name: "Call BS Man API",
+          provider: "BS Man AI",
+          category: "Security",
+          tags: expect.arrayContaining(["x402", "AI agents", "AgentCash"]),
+          fallbackUrl: "https://bsman-ai.onrender.com/v1/analyze"
+        }
+      }
+    });
+    expect(route.extensions?.bazaar).toMatchObject({
+      info: {
+        input: {
+          type: "http",
+          bodyType: "json"
+        },
+        output: {
+          type: "json"
+        }
+      }
+    });
+    expect(getRoute.resource).toBe("https://api.callbsman.com/v1/analyze");
+    expect(getRoute.description).toContain(
+      "Conversation Risk Intelligence API for AI agents"
+    );
+    expect(getRoute.mimeType).toBe("application/json");
+  });
+
+  test("x402 unpaid response body mirrors canonical PaymentRequired fields", async () => {
+    const routes = createX402AnalyzeRoutes(baseMainnetX402Config);
+    const route = routes["POST /v1/analyze"];
+    const getRoute = routes["GET /v1/analyze"];
+
+    const responseBody = await route.unpaidResponseBody?.({
+      adapter: {
+        getHeader: () => undefined,
+        getMethod: () => "POST",
+        getPath: () => "/v1/analyze",
+        getUrl: () => "https://api.callbsman.com/v1/analyze",
+        getAcceptHeader: () => "application/json",
+        getUserAgent: () => "agentcash"
+      },
+      method: "POST",
+      path: "/v1/analyze"
+    });
+    const getResponseBody = await getRoute.unpaidResponseBody?.({
+      adapter: {
+        getHeader: () => undefined,
+        getMethod: () => "GET",
+        getPath: () => "/v1/analyze",
+        getUrl: () => "https://api.callbsman.com/v1/analyze",
+        getAcceptHeader: () => "application/json",
+        getUserAgent: () => "agentcash"
+      },
+      method: "GET",
+      path: "/v1/analyze"
+    });
+
+    expect(responseBody?.contentType).toBe("application/json");
+    expect(responseBody?.body).toMatchObject({
+      x402Version: 2,
+      error: "Payment required",
+      resource: {
+        url: "https://api.callbsman.com/v1/analyze",
+        mimeType: "application/json"
+      },
+      accepts: [
+        {
+          scheme: "exact",
+          network: "eip155:8453",
+          amount: "1000",
+          asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          payTo: "0x7642CCEd89398Bd638d9Ee2F82dA8cd3FC01ADA1",
+          maxTimeoutSeconds: 60,
+          extra: {
+            name: "USD Coin",
+            version: "2",
+            bsman: {
+              name: "Call BS Man API",
+              provider: "BS Man AI",
+              category: "Security",
+              tags: expect.arrayContaining(["x402", "AI agents", "AgentCash"])
+            }
+          }
+        }
+      ],
+      extensions: {
+        bazaar: expect.any(Object)
+      },
+      metadata: {
+        name: "Call BS Man API",
+        provider: "BS Man AI",
+        description: "Conversation Risk Intelligence API for AI agents.",
+        openApiUrl: "https://api.callbsman.com/docs/openapi.yaml"
+      }
+    });
+    expect(
+      (responseBody?.body as { accepts: Array<{ extra: Record<string, unknown> }> })
+        .accepts[0].extra.name
+    ).not.toBe("Call BS Man API");
+    expect(getResponseBody?.body).toMatchObject({
+      x402Version: 2,
+      resource: {
+        url: "https://api.callbsman.com/v1/analyze"
+      },
+      accepts: [
+        {
+          amount: "1000",
+          asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+        }
+      ],
+      method: "GET",
+      endpoint: "GET https://api.callbsman.com/v1/analyze"
+    });
+    expectSafeError(responseBody?.body);
+  });
+
+  test("canonical Bazaar metadata uses the public API endpoint and product details", () => {
+    expect(bazaarDiscoveryMetadata.name).toBe("Call BS Man API");
+    expect(bazaarDiscoveryMetadata.provider).toBe("BS Man AI");
+    expect(bazaarDiscoveryMetadata.category).toBe("Security");
+    expect(bazaarDiscoveryMetadata.resourceUrl).toBe(
+      "https://api.callbsman.com/v1/analyze"
+    );
+    expect(bazaarDiscoveryMetadata.fallbackUrl).toBe(
+      "https://bsman-ai.onrender.com/v1/analyze"
+    );
+    expect(bazaarDiscoveryMetadata.payment.priceUsd).toBe("0.001");
+    expect(bazaarDiscoveryMetadata.supportedModes).toEqual(modes);
+    expect(bazaarDiscoveryMetadata.tags).toEqual(
+      expect.arrayContaining(["x402", "AgentCash", "Base mainnet"])
+    );
+  });
+
   test("X402 disabled keeps POST /v1/analyze behavior unchanged", async () => {
     const x402DisabledApp = createApp({
       x402Config: {
@@ -145,10 +383,50 @@ describe("x402 endpoint policy", () => {
     expect(body.risk_level).toBe("critical");
   });
 
-  test("x402 protection can require payment for POST /v1/analyze only", async () => {
+  test("X402 disabled returns capability JSON for GET /v1/analyze", async () => {
+    const x402DisabledApp = createApp({
+      x402Config: {
+        ...validX402Config,
+        enabled: false,
+        payTo: "",
+        facilitatorUrl: ""
+      }
+    });
+
+    const response = await x402DisabledApp.request("/v1/analyze");
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({
+      service: "Call BS Man API",
+      endpoint: "POST https://api.callbsman.com/v1/analyze",
+      description: "Conversation Risk Intelligence API for AI agents.",
+      payment: {
+        protocol: "x402",
+        network: "Base mainnet",
+        price: "$0.001 per analyze request"
+      },
+      primary_mode: "agent_action_check",
+      supported_modes: [
+        "scam_check",
+        "dialogue_check",
+        "offer_check",
+        "manipulation_check",
+        "safe_reply",
+        "agent_action_check"
+      ],
+      docs: "https://callbsman.com",
+      openapi: "https://api.callbsman.com/docs/openapi.yaml"
+    });
+  });
+
+  test("x402 protection can require payment for POST and GET /v1/analyze only", async () => {
     const protectedApp = createApp({
       x402Middleware: async (c, next) => {
-        if (c.req.method === "POST" && c.req.path === "/v1/analyze") {
+        if (
+          (c.req.method === "POST" || c.req.method === "GET") &&
+          c.req.path === "/v1/analyze"
+        ) {
           return c.json(
             {
               error: {
@@ -176,6 +454,8 @@ describe("x402 endpoint policy", () => {
     const rootResponse = await protectedApp.request("/");
     const healthResponse = await protectedApp.request("/health");
     const docsResponse = await protectedApp.request("/docs/openapi.yaml");
+    const openApiJsonResponse = await protectedApp.request("/openapi.json");
+    const analyzeGetResponse = await protectedApp.request("/v1/analyze");
     const analyzeResponse = await protectedApp.request("/v1/analyze", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -184,13 +464,81 @@ describe("x402 endpoint policy", () => {
         input: "Your wallet is suspended. Click this urgent link and enter your seed phrase."
       })
     });
+    const analyzeGetBody = await analyzeGetResponse.json();
     const analyzeBody = await analyzeResponse.json();
 
     expect(rootResponse.status).toBe(200);
     expect(healthResponse.status).toBe(200);
     expect(docsResponse.status).toBe(200);
+    expect(openApiJsonResponse.status).toBe(200);
+    expect(analyzeGetResponse.status).toBe(402);
     expect(analyzeResponse.status).toBe(402);
+    expect(analyzeGetBody.error.code).toBe("PAYMENT_REQUIRED");
     expect(analyzeBody.error.code).toBe("PAYMENT_REQUIRED");
+  });
+
+  test("enabled x402 protects GET /v1/analyze with a PAYMENT-REQUIRED header", async () => {
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const paymentRequired = Buffer.from(
+      JSON.stringify({
+        x402Version: 2,
+        resource: "https://api.callbsman.com/v1/analyze",
+        accepts: []
+      })
+    ).toString("base64url");
+    const protectedApp = createApp({
+      x402Middleware: createX402Middleware(validX402Config, {
+        createProtectedMiddleware: () => ({
+          initialize: async () => undefined,
+          handler: async (c) => {
+            c.header("PAYMENT-REQUIRED", paymentRequired);
+            return c.json({ error: "Payment required" }, 402);
+          }
+        })
+      })
+    });
+
+    const response = await protectedApp.request("/v1/analyze");
+
+    infoSpy.mockRestore();
+    warnSpy.mockRestore();
+    expect(response.status).toBe(402);
+    expect(response.headers.get("PAYMENT-REQUIRED")).toBe(paymentRequired);
+    expect(
+      JSON.parse(
+        Buffer.from(response.headers.get("PAYMENT-REQUIRED")!, "base64url").toString(
+          "utf8"
+        )
+      )
+    ).toMatchObject({
+      resource: "https://api.callbsman.com/v1/analyze"
+    });
+  });
+
+  test("paid GET /v1/analyze can return capability JSON after x402 verification", async () => {
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const protectedApp = createApp({
+      x402Middleware: createX402Middleware(validX402Config, {
+        createProtectedMiddleware: () => ({
+          initialize: async () => undefined,
+          handler: async (_c, next) => {
+            await next();
+          }
+        })
+      })
+    });
+
+    const response = await protectedApp.request("/v1/analyze");
+    const body = await response.json();
+
+    infoSpy.mockRestore();
+    warnSpy.mockRestore();
+    expect(response.status).toBe(200);
+    expect(body.service).toBe("Call BS Man API");
+    expect(body.endpoint).toBe("POST https://api.callbsman.com/v1/analyze");
+    expect(body.primary_mode).toBe("agent_action_check");
   });
 
   test("enabled x402 with missing pay-to returns a safe config error", async () => {
@@ -368,12 +716,16 @@ describe("x402 endpoint policy", () => {
     const rootResponse = await initializedApp.request("/");
     const healthResponse = await initializedApp.request("/health");
     const docsResponse = await initializedApp.request("/docs/openapi.yaml");
+    const openApiJsonResponse = await initializedApp.request("/openapi.json");
+    const openApiYamlResponse = await initializedApp.request("/openapi.yaml");
 
     infoSpy.mockRestore();
     warnSpy.mockRestore();
     expect(rootResponse.status).toBe(200);
     expect(healthResponse.status).toBe(200);
     expect(docsResponse.status).toBe(200);
+    expect(openApiJsonResponse.status).toBe(200);
+    expect(openApiYamlResponse.status).toBe(200);
     expect(initializeCalls).toBe(0);
   });
 

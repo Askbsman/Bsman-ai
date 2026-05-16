@@ -1,11 +1,21 @@
-import { HTTPFacilitatorClient } from "@x402/core/server";
+import {
+  HTTPFacilitatorClient,
+  type HTTPRequestContext,
+  type HTTPResponseBody
+} from "@x402/core/server";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
+import { bazaarResourceServerExtension } from "@x402/extensions";
 import {
   paymentMiddlewareFromHTTPServer,
   x402HTTPResourceServer,
   x402ResourceServer
 } from "@x402/hono";
 import type { Context, MiddlewareHandler } from "hono";
+import {
+  bazaarDiscoveryMetadata,
+  createBazaarAnalyzeDiscoveryExtensions,
+  createBazaarCapabilityDiscoveryExtensions
+} from "../config/discovery.js";
 import type { X402Config, X402ConfigValidation } from "../config/x402.js";
 import {
   isEvmAddress,
@@ -24,6 +34,124 @@ function price(value: string): string {
   return value.startsWith("$") ? value : `$${value}`;
 }
 
+export function createX402PaymentRequiredBody(
+  config: X402Config,
+  context: Pick<HTTPRequestContext, "method" | "path">
+): Promise<Record<string, unknown>> {
+  const requestMethod = context.method.toUpperCase();
+  const publicPrice = price(config.analyzePriceUsd);
+  const resource = {
+    url: bazaarDiscoveryMetadata.resourceUrl,
+    description:
+      "Conversation Risk Intelligence API for AI agents. Call BS Man API analyzes chats, offers, and proposed agent actions for scam signals, manipulation tactics, unsafe payment requests, wallet/payment risk, and risky next steps.",
+    mimeType: bazaarDiscoveryMetadata.mimeType
+  };
+
+  return buildAnalyzePaymentRequirements(config).then((accepts) => ({
+    x402Version: 2,
+    error: "Payment required",
+    resource,
+    accepts,
+    extensions:
+      requestMethod === "GET"
+        ? createBazaarCapabilityDiscoveryExtensions()
+        : createBazaarAnalyzeDiscoveryExtensions(),
+    compatibility: {
+      paymentRequiredHeader: "PAYMENT-REQUIRED",
+      headerIsCanonical: true,
+      hint:
+        "The PAYMENT-REQUIRED header is canonical. This JSON body mirrors the same PaymentRequired payload for clients that read the body."
+    },
+    resourceUrl: bazaarDiscoveryMetadata.resourceUrl,
+    method: requestMethod,
+    endpoint: `${requestMethod} ${bazaarDiscoveryMetadata.resourceUrl}`,
+    payment: {
+      protocol: bazaarDiscoveryMetadata.payment.protocol,
+      network: bazaarDiscoveryMetadata.payment.network,
+      networkId: config.network,
+      price: `${publicPrice} ${bazaarDiscoveryMetadata.payment.unit}`,
+      facilitator: "configured x402 facilitator"
+    },
+    metadata: {
+      name: bazaarDiscoveryMetadata.name,
+      provider: bazaarDiscoveryMetadata.provider,
+      category: bazaarDiscoveryMetadata.category,
+      description: "Conversation Risk Intelligence API for AI agents.",
+      mimeType: bazaarDiscoveryMetadata.mimeType,
+      docsUrl: bazaarDiscoveryMetadata.docsUrl,
+      openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
+      githubUrl: bazaarDiscoveryMetadata.githubUrl,
+      mainMode: bazaarDiscoveryMetadata.mainMode,
+      supportedModes: [...bazaarDiscoveryMetadata.supportedModes],
+      tags: [...bazaarDiscoveryMetadata.tags],
+      fallbackUrl: bazaarDiscoveryMetadata.fallbackUrl
+    }
+  }));
+}
+
+type AnalyzePaymentOption = {
+  scheme: "exact";
+  price: string;
+  network: `${string}:${string}`;
+  payTo: string;
+  maxTimeoutSeconds: number;
+  extra: Record<string, unknown>;
+};
+
+function createAnalyzePaymentOption(config: X402Config): AnalyzePaymentOption {
+  return {
+    scheme: "exact",
+    price: price(config.analyzePriceUsd),
+    network: config.network as `${string}:${string}`,
+    payTo: config.payTo,
+    maxTimeoutSeconds: 60,
+    extra: {
+      bsman: {
+        name: bazaarDiscoveryMetadata.name,
+        provider: bazaarDiscoveryMetadata.provider,
+        category: bazaarDiscoveryMetadata.category,
+        tags: [...bazaarDiscoveryMetadata.tags],
+        docsUrl: bazaarDiscoveryMetadata.docsUrl,
+        openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
+        githubUrl: bazaarDiscoveryMetadata.githubUrl,
+        mainMode: bazaarDiscoveryMetadata.mainMode,
+        supportedModes: [...bazaarDiscoveryMetadata.supportedModes],
+        fallbackUrl: bazaarDiscoveryMetadata.fallbackUrl
+      }
+    }
+  };
+}
+
+async function buildAnalyzePaymentRequirements(config: X402Config) {
+  const option = createAnalyzePaymentOption(config);
+  const parsedPrice = await new ExactEvmScheme().parsePrice(
+    option.price,
+    option.network
+  );
+
+  return [
+    {
+      scheme: option.scheme,
+      network: option.network,
+      amount: parsedPrice.amount,
+      asset: parsedPrice.asset,
+      payTo: option.payTo,
+      maxTimeoutSeconds: option.maxTimeoutSeconds ?? 300,
+      extra: {
+        ...parsedPrice.extra,
+        ...option.extra
+      }
+    }
+  ];
+}
+
+function createUnpaidResponseBody(config: X402Config) {
+  return async (context: HTTPRequestContext): Promise<HTTPResponseBody> => ({
+    contentType: "application/json",
+    body: await createX402PaymentRequiredBody(config, context)
+  });
+}
+
 type ProtectedPaymentMiddleware = {
   handler: MiddlewareHandler;
   initialize: () => Promise<void>;
@@ -34,7 +162,10 @@ export type X402MiddlewareDependencies = {
 };
 
 function isProtectedAnalyzeRoute(c: Context): boolean {
-  return c.req.method === "POST" && c.req.path === "/v1/analyze";
+  return (
+    (c.req.method === "POST" || c.req.method === "GET") &&
+    c.req.path === "/v1/analyze"
+  );
 }
 
 function facilitatorHost(value: string): string | null {
@@ -99,18 +230,30 @@ function logInitialization(
   });
 }
 
-function createRoutes(config: X402Config) {
+export function createX402AnalyzeRoutes(config: X402Config) {
+  const createAccepts = () => createAnalyzePaymentOption(config);
+  const baseRoute = {
+    resource: bazaarDiscoveryMetadata.resourceUrl,
+    description:
+      "Conversation Risk Intelligence API for AI agents. Call BS Man API analyzes chats, offers, and proposed agent actions for scam signals, manipulation tactics, unsafe payment requests, wallet/payment risk, and risky next steps.",
+    mimeType: bazaarDiscoveryMetadata.mimeType,
+    unpaidResponseBody: createUnpaidResponseBody(config)
+  };
+
   return {
     "POST /v1/analyze": {
-      accepts: {
-        scheme: "exact",
-        price: price(config.analyzePriceUsd),
-        network: config.network as `${string}:${string}`,
-        payTo: config.payTo,
-        maxTimeoutSeconds: 60
-      },
-      description: "BS Man Risk API analyze request",
-      mimeType: "application/json"
+      ...baseRoute,
+      accepts: createAccepts(),
+      extensions: {
+        ...createBazaarAnalyzeDiscoveryExtensions()
+      }
+    },
+    "GET /v1/analyze": {
+      ...baseRoute,
+      accepts: createAccepts(),
+      extensions: {
+        ...createBazaarCapabilityDiscoveryExtensions()
+      }
     }
   };
 }
@@ -120,13 +263,12 @@ function createOfficialProtectedMiddleware(config: X402Config): ProtectedPayment
   const facilitatorClient = new HTTPFacilitatorClient({
     url: config.facilitatorUrl
   });
-  const resourceServer = new x402ResourceServer(facilitatorClient).register(
-    network,
-    new ExactEvmScheme()
-  );
+  const resourceServer = new x402ResourceServer(facilitatorClient)
+    .register(network, new ExactEvmScheme())
+    .registerExtension(bazaarResourceServerExtension);
   const httpServer = new x402HTTPResourceServer(
     resourceServer,
-    createRoutes(config)
+    createX402AnalyzeRoutes(config)
   );
 
   return {
