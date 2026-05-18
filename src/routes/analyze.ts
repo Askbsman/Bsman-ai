@@ -51,6 +51,22 @@ async function parseAnalyzeRequest(c: Context) {
 
 analyzeRoute.get("/analyze", (c) => c.json(analyzeCapabilityResponse));
 
+analyzeRoute.get("/demo/analyze", (c) =>
+  c.json({
+    service: "Call BS Man API",
+    endpoint: "POST /v1/demo/analyze",
+    description:
+      "Free demo endpoint for the BS Man Console. Send a POST request with the same body as /v1/analyze.",
+    free_demo: {
+      enabled: true,
+      limit: demoLimit,
+      scope: "per client IP while this server process is running"
+    },
+    console: "https://callbsman.com/app.html",
+    paid_endpoint: "POST https://api.callbsman.com/v1/analyze"
+  })
+);
+
 analyzeRoute.post("/analyze", async (c) => {
   const parsed = await parseAnalyzeRequest(c);
   if (parsed.response) {

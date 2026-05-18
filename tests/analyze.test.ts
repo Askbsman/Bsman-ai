@@ -220,6 +220,22 @@ describe("service endpoints", () => {
     expect(limitedBody.error.code).toBe("DEMO_LIMIT_REACHED");
   });
 
+  test("GET demo analyze endpoint explains how to use the free demo", async () => {
+    const response = await app.request("/v1/demo/analyze");
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      service: "Call BS Man API",
+      endpoint: "POST /v1/demo/analyze",
+      free_demo: {
+        enabled: true,
+        limit: 3
+      },
+      paid_endpoint: "POST https://api.callbsman.com/v1/analyze"
+    });
+  });
+
   test("demo analyze endpoint remains free when x402 is enabled", async () => {
     const protectedApp = createApp({
       x402Config: {
