@@ -348,7 +348,7 @@ footer{
       <img src="assets/logo-header.png" alt="BS Man AI logo" />
     </a>
     <nav class="main-nav" aria-label="Primary">
-      <a href="index.html">Landing</a>
+      <a href="index.html">Home</a>
       <a href="https://api.callbsman.com/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
       <a href="https://github.com/Askbsman/Bsman-ai" target="_blank" rel="noopener">GitHub</a>
     </nav>
@@ -518,8 +518,9 @@ footer{
 
 <script>
 (function(){
-  var endpoint = 'https://api.callbsman.com/v1/analyze';
-  var demoEndpoint = 'https://api.callbsman.com/v1/demo/analyze';
+  var apiBase = window.location.protocol === 'file:' ? 'http://localhost:3000' : 'https://api.callbsman.com';
+  var endpoint = apiBase + '/v1/analyze';
+  var demoEndpoint = apiBase + '/v1/demo/analyze';
   var state = { mode: 'agent_action_check' };
   var els = {
     message: document.getElementById('messageText'),
@@ -589,6 +590,56 @@ footer{
     });
   }
 
+  function localPreviewResult(body){
+    var text = [
+      body.input,
+      body.context.proposed_action,
+      body.context.recipient_type,
+      body.context.channel,
+      body.context.verification_status
+    ].join(' ').toLowerCase();
+    var reasons = [];
+    var score = 20;
+    [
+      ['telegram', 14, 'Telegram or off-platform channel involved.'],
+      ['unknown', 18, 'Counterparty or wallet is not verified.'],
+      ['unverified', 18, 'Verification status is unverified.'],
+      ['connect_wallet', 20, 'Wallet connection requested.'],
+      ['send_payment', 20, 'Payment action requested.'],
+      ['guaranteed', 16, 'Guaranteed outcome language detected.'],
+      ['urgent', 12, 'Urgency or pressure language detected.'],
+      ['today', 8, 'Short deadline pressure detected.'],
+      ['seed phrase', 28, 'Sensitive wallet secret language detected.']
+    ].forEach(function(rule){
+      if(text.indexOf(rule[0]) !== -1){
+        score += rule[1];
+        reasons.push(rule[2]);
+      }
+    });
+    score = Math.min(score, 100);
+    var level = score >= 85 ? 'critical' : score >= 65 ? 'high' : score >= 35 ? 'medium' : 'low';
+    var verdict = score >= 85 ? 'do_not_proceed' : score >= 65 ? 'require_human_review' : score >= 35 ? 'pause_and_verify' : 'proceed_with_caution';
+    return {
+      mode: body.mode,
+      risk_score: score,
+      risk_level: level,
+      summary: 'Local preview only. Deploy or run the API to get the live server analysis.',
+      red_flags: reasons,
+      recommended_action: score >= 65 ? 'Pause and verify through an independent official channel.' : 'Proceed only after normal verification.',
+      safe_reply: body.options.include_safe_reply ? 'I cannot proceed until I verify this through an official channel.' : null,
+      verdict: verdict,
+      requires_human_review: score >= 65,
+      next_best_action: score >= 65 ? 'Do not continue the action until a human verifies the request.' : 'Verify the counterparty before continuing.',
+      action_risk_reasons: reasons,
+      demo: {
+        free: true,
+        local_preview: true,
+        limit: 3,
+        remaining: 'available after deploy'
+      }
+    };
+  }
+
   document.querySelectorAll('[data-mode]').forEach(function(btn){
     btn.addEventListener('click', function(){
       state.mode = btn.getAttribute('data-mode');
@@ -654,9 +705,10 @@ footer{
       }
       setResult('Error', 'warn', '<strong>HTTP ' + res.status + '</strong><pre>' + escapeHtml(JSON.stringify(body, null, 2)) + '</pre>');
     } catch (error){
-      setResult('Browser blocked', 'warn',
-        '<strong>The browser could not complete the request.</strong><br />This is usually CORS or network policy. Use the AgentCash command above for the paid x402 call.<pre>' +
-        escapeHtml(error && error.message ? error.message : String(error)) + '</pre>');
+      var preview = localPreviewResult(payload());
+      setResult('Local preview', 'warn',
+        '<strong>Local preview result.</strong><br />The live demo endpoint is not reachable from this local file preview yet. After deploy, this panel will use the real API.<pre>' +
+        escapeHtml(JSON.stringify(preview, null, 2)) + '</pre>');
     }
   });
 
