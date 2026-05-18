@@ -361,12 +361,13 @@ footer{
     <div class="container hero-grid">
       <div>
         <h1>Ask BS Man.<span>Before you act.</span></h1>
-        <p>Paste a suspicious message, choose what your agent is about to do, and build a paid Call BS Man API request. The browser can preview the x402 challenge; x402 payment still happens through an x402-capable client.</p>
+        <p>Paste a suspicious message, choose what your agent is about to do, and run up to 3 free demo checks. After that, continue through the paid x402 API.</p>
       </div>
       <aside class="status-panel" aria-label="API status">
         <div class="status-row"><span>Endpoint</span><span>POST /v1/analyze</span></div>
         <div class="status-row"><span>Network</span><span>Base mainnet</span></div>
-        <div class="status-row"><span>Price</span><span>$0.001</span></div>
+        <div class="status-row"><span>Demo</span><span>3 free checks</span></div>
+        <div class="status-row"><span>Paid price</span><span>$0.001</span></div>
         <div class="status-row"><span>Primary mode</span><span>agent_action_check</span></div>
       </aside>
     </div>
@@ -443,7 +444,7 @@ footer{
             </div>
 
             <div class="action-row">
-              <button class="btn btn--primary" type="button" id="runProbe">Check payment/API</button>
+              <button class="btn btn--primary" type="button" id="runProbe">Run free check</button>
               <button class="btn btn--ghost" type="button" id="copyJson">Copy JSON</button>
               <button class="btn btn--flat" type="button" id="copyAgentCash">Copy AgentCash command</button>
             </div>
@@ -454,15 +455,15 @@ footer{
           <div class="module-head">
             <div>
               <h3>How this works</h3>
-              <p>The page helps humans prepare a request. Payment is still handled by x402 clients.</p>
+              <p>The page gives humans 3 free demo checks. Paid production use stays on x402.</p>
             </div>
           </div>
           <div class="module-body">
             <ol class="steps">
               <li><b>1</b><span>Paste the message or proposed agent action.</span></li>
-              <li><b>2</b><span>Copy the JSON or AgentCash command.</span></li>
-              <li><b>3</b><span>An x402-capable client pays $0.001 on Base mainnet.</span></li>
-              <li><b>4</b><span>Call BS Man returns risk_score, verdict, red flags, and next_best_action.</span></li>
+              <li><b>2</b><span>Run up to 3 free demo checks from this page.</span></li>
+              <li><b>3</b><span>For more checks, copy the AgentCash command.</span></li>
+              <li><b>4</b><span>The paid API returns the same risk_score, verdict, red flags, and next_best_action.</span></li>
             </ol>
           </div>
         </section>
@@ -490,7 +491,7 @@ footer{
           </div>
           <div class="module-body">
             <pre id="commandPreview"></pre>
-            <div class="notice">The browser probe may return 402. That is expected: the paid analysis response appears after x402 payment proof is supplied by a compatible client.</div>
+            <div class="notice">The free demo endpoint is limited to 3 checks per visitor. Production agent traffic should use the paid x402 endpoint.</div>
           </div>
         </section>
 
@@ -498,7 +499,7 @@ footer{
           <div class="module-head">
             <div>
               <h3>Live result</h3>
-              <p>Shows API status, payment challenge, or paid JSON if your client can complete x402.</p>
+              <p>Shows the free demo result, limit state, or a paid API hint.</p>
             </div>
             <span class="pill" id="resultPill">Ready</span>
           </div>
@@ -518,6 +519,7 @@ footer{
 <script>
 (function(){
   var endpoint = 'https://api.callbsman.com/v1/analyze';
+  var demoEndpoint = 'https://api.callbsman.com/v1/demo/analyze';
   var state = { mode: 'agent_action_check' };
   var els = {
     message: document.getElementById('messageText'),
@@ -619,9 +621,9 @@ footer{
       setResult('Missing input', 'warn', 'Paste a message or situation first.');
       return;
     }
-    setResult('Checking', '', 'Contacting the live endpoint...');
+    setResult('Checking', '', 'Running a free demo check...');
     try{
-      var res = await fetch(endpoint, {
+      var res = await fetch(demoEndpoint, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(payload())
@@ -630,16 +632,24 @@ footer{
       var paymentHeader = res.headers.get('PAYMENT-REQUIRED');
       var body;
       try{ body = JSON.parse(text); } catch { body = text; }
+      if(res.status === 429){
+        setResult('Demo limit', 'warn',
+          '<strong>Free demo limit reached.</strong><br />Use the AgentCash command above for the paid x402 API.<pre>' +
+          escapeHtml(command(payload())) + '</pre>');
+        return;
+      }
       if(res.status === 402){
         setResult('Payment required', 'warn',
-          '<strong>HTTP 402 Payment Required.</strong><br />' +
-          'The endpoint is live and protected by x402.<br />' +
+          '<strong>HTTP 402 Payment Required.</strong><br />The paid endpoint is protected by x402.<br />' +
           (paymentHeader ? '<br /><strong>PAYMENT-REQUIRED header:</strong><pre>' + escapeHtml(paymentHeader.slice(0, 900)) + '</pre>' : '') +
           '<br /><strong>Body:</strong><pre>' + escapeHtml(JSON.stringify(body, null, 2)) + '</pre>');
         return;
       }
       if(res.ok){
-        setResult('Response', 'ok', '<pre>' + escapeHtml(JSON.stringify(body, null, 2)) + '</pre>');
+        var remaining = body && body.demo ? body.demo.remaining : null;
+        setResult('Free check', 'ok',
+          '<strong>Demo result' + (remaining !== null ? ' - ' + remaining + ' free checks left' : '') + '.</strong>' +
+          '<pre>' + escapeHtml(JSON.stringify(body, null, 2)) + '</pre>');
         return;
       }
       setResult('Error', 'warn', '<strong>HTTP ' + res.status + '</strong><pre>' + escapeHtml(JSON.stringify(body, null, 2)) + '</pre>');

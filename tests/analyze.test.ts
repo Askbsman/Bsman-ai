@@ -174,6 +174,95 @@ describe("service endpoints", () => {
     );
   });
 
+  test("demo analyze endpoint allows three free checks per client", async () => {
+    const payload = {
+      mode: "agent_action_check",
+      input: "A Telegram admin says I must connect my wallet today or lose access.",
+      context: {
+        proposed_action: "connect_wallet",
+        recipient_type: "telegram_admin",
+        channel: "telegram",
+        verification_status: "unverified"
+      },
+      language: "en",
+      locale: "US"
+    };
+    const headers = {
+      "content-type": "application/json",
+      "x-forwarded-for": "203.0.113.77"
+    };
+
+    for (const remaining of [2, 1, 0]) {
+      const response = await app.request("/v1/demo/analyze", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload)
+      });
+      const body = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(body.risk_score).toBeGreaterThanOrEqual(0);
+      expect(body.demo).toMatchObject({
+        free: true,
+        limit: 3,
+        remaining
+      });
+    }
+
+    const limitedResponse = await app.request("/v1/demo/analyze", {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload)
+    });
+    const limitedBody = await limitedResponse.json();
+
+    expect(limitedResponse.status).toBe(429);
+    expect(limitedBody.error.code).toBe("DEMO_LIMIT_REACHED");
+  });
+
+  test("demo analyze endpoint remains free when x402 is enabled", async () => {
+    const protectedApp = createApp({
+      x402Config: {
+        ...validX402Config,
+        enabled: true
+      },
+      x402Middleware: createX402Middleware(
+        {
+          ...validX402Config,
+          enabled: true
+        },
+        {
+          createProtectedMiddleware: () => ({
+            initialize: async () => undefined,
+            handler: async (c, next) => {
+              if (c.req.path === "/v1/analyze") {
+                return c.json({ error: "Payment required" }, 402);
+              }
+              await next();
+            }
+          })
+        }
+      )
+    });
+
+    const response = await protectedApp.request("/v1/demo/analyze", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-forwarded-for": "203.0.113.78"
+      },
+      body: JSON.stringify({
+        mode: "scam_check",
+        input: "Guaranteed crypto returns if I send money now.",
+        language: "en"
+      })
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.demo.remaining).toBe(2);
+  });
+
   test("GET /docs/openapi.yaml serves the OpenAPI document", async () => {
     const response = await app.request("/docs/openapi.yaml");
     const body = await response.text();

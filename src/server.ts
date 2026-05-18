@@ -25,7 +25,7 @@ export function createApp(options: CreateAppOptions = {}) {
   app.use(
     "*",
     cors({
-      origin: ["https://callbsman.com", "https://www.callbsman.com"],
+      origin: ["https://callbsman.com", "https://www.callbsman.com", "null"],
       allowMethods: ["GET", "POST", "OPTIONS"],
       allowHeaders: ["Content-Type", "X-PAYMENT", "Authorization"],
       exposeHeaders: ["PAYMENT-REQUIRED"],
