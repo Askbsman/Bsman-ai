@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>BS Man Console - Conversation Risk Check</title>
+<meta name="description" content="A simple interface for building and testing Call BS Man API risk analysis requests." />
+<meta name="theme-color" content="#060608" />
+<link rel="icon" type="image/png" href="assets/logo-mark.png" />
+<style>
+:root{
+  --black:#060608;
+  --onyx:#0B0B0D;
+  --panel:#0F1217;
+  --panel-2:#14181F;
+  --line:rgba(240,185,11,.16);
+  --line-strong:rgba(240,185,11,.34);
+  --gold:#F0B90B;
+  --amber:#FFC93C;
+  --gold-soft:rgba(240,185,11,.10);
+  --offwhite:#EAE9E6;
+  --soft:#B8C0CC;
+  --muted:#8A8F98;
+  --danger:#FF3830;
+  --success:#22C55E;
+  --info:#299BF6;
+  --maxw:1240px;
+  --font-display:Impact,"Arial Black","Anton","Bebas Neue","Oswald",sans-serif;
+  --font-body:Inter,Montserrat,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+}
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(900px 620px at 78% -8%, rgba(240,185,11,.12), transparent 60%),
+    radial-gradient(720px 520px at 8% 26%, rgba(240,185,11,.06), transparent 65%),
+    linear-gradient(180deg,#060608 0%,#090A0D 100%);
+  color:var(--offwhite);
+  font-family:var(--font-body);
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1;
+  opacity:.035;
+  mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .8 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+header,main,footer{ position:relative; z-index:2; }
+a{ color:inherit; text-decoration:none; }
+button,input,select,textarea{ font:inherit; }
+.container{ width:100%; max-width:var(--maxw); margin:0 auto; padding:0 28px; }
+.site-header{
+  position:sticky;
+  top:0;
+  z-index:50;
+  height:78px;
+  display:flex;
+  align-items:center;
+  background:rgba(6,6,8,.76);
+  border-bottom:1px solid var(--line);
+  backdrop-filter:saturate(160%) blur(10px);
+}
+.header-inner{ display:flex; align-items:center; justify-content:space-between; gap:24px; }
+.brand{ display:flex; align-items:center; flex-shrink:0; }
+.brand img{ height:44px; display:block; width:auto; }
+.main-nav{ display:flex; align-items:center; gap:6px; }
+.main-nav a{
+  font-size:13.5px;
+  font-weight:500;
+  letter-spacing:.02em;
+  padding:8px 12px;
+  border-radius:8px;
+  color:var(--soft);
+}
+.main-nav a:hover{ color:var(--offwhite); background:rgba(255,255,255,.04); }
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:42px;
+  padding:11px 18px;
+  border-radius:999px;
+  border:1px solid transparent;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:.01em;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:transform .15s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+}
+.btn--primary{
+  background:linear-gradient(180deg,#FFD24A 0%,#F0B90B 100%);
+  color:#090A0D;
+  box-shadow:0 0 0 1px rgba(240,185,11,.55),0 14px 36px -14px rgba(240,185,11,.7);
+}
+.btn--primary:hover{ transform:translateY(-1px); }
+.btn--ghost{
+  background:rgba(255,255,255,.035);
+  color:var(--offwhite);
+  border-color:rgba(255,255,255,.11);
+}
+.btn--ghost:hover{ border-color:rgba(240,185,11,.38); color:var(--amber); }
+.btn--flat{
+  background:transparent;
+  color:var(--soft);
+  border-color:rgba(255,255,255,.08);
+}
+.hero{
+  padding:54px 0 34px;
+  border-bottom:1px solid var(--line);
+}
+.hero-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);
+  gap:36px;
+  align-items:end;
+}
+.hero h1{
+  margin:0;
+  font-family:var(--font-display);
+  font-size:clamp(48px,7vw,92px);
+  line-height:.88;
+  letter-spacing:0;
+  text-transform:uppercase;
+}
+.hero h1 span{ display:block; color:var(--amber); }
+.hero p{
+  max-width:720px;
+  margin:20px 0 0;
+  color:var(--soft);
+  font-size:17px;
+}
+.status-panel{
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+  border-radius:14px;
+  padding:18px;
+}
+.status-row{ display:flex; justify-content:space-between; gap:16px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.07); }
+.status-row:last-child{ border-bottom:0; }
+.status-row span:first-child{ color:var(--muted); font-size:13px; }
+.status-row span:last-child{ color:var(--offwhite); font-family:var(--font-mono); font-size:13px; text-align:right; }
+.console{
+  padding:34px 0 58px;
+}
+.console-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr);
+  gap:22px;
+  align-items:start;
+}
+.module{
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(15,18,23,.86);
+  box-shadow:0 24px 80px rgba(0,0,0,.28);
+  overflow:hidden;
+}
+.module + .module{ margin-top:22px; }
+.module-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  padding:18px 20px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.module-head h2,.module-head h3{ margin:0; font-size:18px; line-height:1.2; }
+.module-head p{ margin:6px 0 0; color:var(--muted); font-size:13px; }
+.module-body{ padding:20px; }
+.mode-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-bottom:18px;
+}
+.mode-btn{
+  min-height:46px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.035);
+  color:var(--soft);
+  cursor:pointer;
+  font-size:13px;
+  font-weight:700;
+}
+.mode-btn.active{
+  color:#090A0D;
+  background:linear-gradient(180deg,#FFD24A,#F0B90B);
+  border-color:rgba(240,185,11,.7);
+}
+.field{ margin-bottom:16px; }
+.field label{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:8px;
+  color:var(--soft);
+  font-size:13px;
+  font-weight:700;
+}
+.field small{ color:var(--muted); font-weight:500; }
+textarea,input,select{
+  width:100%;
+  color:var(--offwhite);
+  background:rgba(0,0,0,.24);
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:10px;
+  outline:none;
+}
+textarea{ min-height:180px; padding:14px; resize:vertical; }
+input,select{ min-height:44px; padding:10px 12px; }
+textarea:focus,input:focus,select:focus{ border-color:rgba(240,185,11,.58); box-shadow:0 0 0 3px rgba(240,185,11,.10); }
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+.option-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.check-card{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-height:44px;
+  padding:10px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:10px;
+  background:rgba(255,255,255,.03);
+  color:var(--soft);
+  font-size:13px;
+  font-weight:700;
+}
+.check-card input{ width:auto; min-height:auto; accent-color:var(--gold); }
+.action-row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+pre{
+  margin:0;
+  padding:16px;
+  max-height:360px;
+  overflow:auto;
+  color:#DCE4EF;
+  background:#07080B;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  line-height:1.55;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+.notice{
+  margin-top:14px;
+  padding:13px 14px;
+  border-radius:10px;
+  border:1px solid rgba(240,185,11,.24);
+  background:var(--gold-soft);
+  color:var(--soft);
+  font-size:13px;
+}
+.result-box{
+  min-height:156px;
+  padding:16px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.08);
+  background:#07080B;
+  color:var(--soft);
+}
+.result-box strong{ color:var(--offwhite); }
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  min-height:28px;
+  padding:5px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.1);
+  color:var(--soft);
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.pill::before{ content:""; width:7px; height:7px; border-radius:50%; background:var(--gold); box-shadow:0 0 10px rgba(240,185,11,.7); }
+.pill.ok::before{ background:var(--success); box-shadow:0 0 10px rgba(34,197,94,.7); }
+.pill.warn::before{ background:var(--danger); box-shadow:0 0 10px rgba(255,56,48,.7); }
+.steps{
+  display:grid;
+  gap:10px;
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+.steps li{
+  display:grid;
+  grid-template-columns:30px minmax(0,1fr);
+  gap:10px;
+  color:var(--soft);
+  font-size:14px;
+}
+.steps b{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background:var(--gold-soft);
+  color:var(--amber);
+  border:1px solid rgba(240,185,11,.22);
+}
+footer{
+  border-top:1px solid var(--line);
+  padding:24px 0;
+  color:var(--muted);
+  font-size:13px;
+}
+@media (max-width:980px){
+  .main-nav{ display:none; }
+  .hero-grid,.console-grid{ grid-template-columns:1fr; }
+  .status-panel{ max-width:560px; }
+}
+@media (max-width:640px){
+  .container{ padding:0 18px; }
+  .hero{ padding:34px 0 24px; }
+  .mode-grid,.form-grid,.option-row{ grid-template-columns:1fr; }
+  .action-row .btn{ width:100%; }
+  .module-head{ flex-direction:column; }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="index.html" aria-label="BS Man AI home">
+      <img src="assets/logo-header.png" alt="BS Man AI logo" />
+    </a>
+    <nav class="main-nav" aria-label="Primary">
+      <a href="index.html">Landing</a>
+      <a href="https://api.callbsman.com/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
+      <a href="https://github.com/Askbsman/Bsman-ai" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <a class="btn btn--primary" href="#console">Use Console</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <h1>Ask BS Man.<span>Before you act.</span></h1>
+        <p>Paste a suspicious message, choose what your agent is about to do, and build a paid Call BS Man API request. The browser can preview the x402 challenge; x402 payment still happens through an x402-capable client.</p>
+      </div>
+      <aside class="status-panel" aria-label="API status">
+        <div class="status-row"><span>Endpoint</span><span>POST /v1/analyze</span></div>
+        <div class="status-row"><span>Network</span><span>Base mainnet</span></div>
+        <div class="status-row"><span>Price</span><span>$0.001</span></div>
+        <div class="status-row"><span>Primary mode</span><span>agent_action_check</span></div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="console" id="console">
+    <div class="container console-grid">
+      <div>
+        <section class="module">
+          <div class="module-head">
+            <div>
+              <h2>Risk Check</h2>
+              <p>Build the exact JSON your agent sends to Call BS Man API.</p>
+            </div>
+            <span class="pill ok">Live API</span>
+          </div>
+          <div class="module-body">
+            <div class="mode-grid" role="group" aria-label="Analysis mode">
+              <button class="mode-btn active" type="button" data-mode="agent_action_check">Agent action</button>
+              <button class="mode-btn" type="button" data-mode="scam_check">Scam</button>
+              <button class="mode-btn" type="button" data-mode="dialogue_check">Dialogue</button>
+              <button class="mode-btn" type="button" data-mode="offer_check">Offer</button>
+              <button class="mode-btn" type="button" data-mode="manipulation_check">Manipulation</button>
+              <button class="mode-btn" type="button" data-mode="safe_reply">Safe reply</button>
+            </div>
+
+            <div class="field">
+              <label for="messageText">Message or situation <small>English only for v0.1</small></label>
+              <textarea id="messageText">A Telegram admin says I must connect my wallet today or lose access to my account.</textarea>
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label for="proposedAction">Proposed action</label>
+                <select id="proposedAction">
+                  <option value="connect_wallet">connect_wallet</option>
+                  <option value="send_payment">send_payment</option>
+                  <option value="sign_message">sign_message</option>
+                  <option value="share_sensitive_data">share_sensitive_data</option>
+                  <option value="click_link">click_link</option>
+                  <option value="reply">reply</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="asset">Asset</label>
+                <input id="asset" value="USDC" />
+              </div>
+              <div class="field">
+                <label for="amount">Amount</label>
+                <input id="amount" value="250" />
+              </div>
+              <div class="field">
+                <label for="recipientType">Recipient type</label>
+                <input id="recipientType" value="unknown_wallet" />
+              </div>
+              <div class="field">
+                <label for="channel">Channel</label>
+                <input id="channel" value="telegram" />
+              </div>
+              <div class="field">
+                <label for="verificationStatus">Verification</label>
+                <select id="verificationStatus">
+                  <option value="unverified">unverified</option>
+                  <option value="partially_verified">partially_verified</option>
+                  <option value="verified">verified</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="option-row">
+              <label class="check-card"><input id="safeReply" type="checkbox" checked /> Safe reply</label>
+              <label class="check-card"><input id="patterns" type="checkbox" checked /> Patterns</label>
+              <label class="check-card"><input id="sensitive" type="checkbox" /> Sensitive data</label>
+            </div>
+
+            <div class="action-row">
+              <button class="btn btn--primary" type="button" id="runProbe">Check payment/API</button>
+              <button class="btn btn--ghost" type="button" id="copyJson">Copy JSON</button>
+              <button class="btn btn--flat" type="button" id="copyAgentCash">Copy AgentCash command</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="module">
+          <div class="module-head">
+            <div>
+              <h3>How this works</h3>
+              <p>The page helps humans prepare a request. Payment is still handled by x402 clients.</p>
+            </div>
+          </div>
+          <div class="module-body">
+            <ol class="steps">
+              <li><b>1</b><span>Paste the message or proposed agent action.</span></li>
+              <li><b>2</b><span>Copy the JSON or AgentCash command.</span></li>
+              <li><b>3</b><span>An x402-capable client pays $0.001 on Base mainnet.</span></li>
+              <li><b>4</b><span>Call BS Man returns risk_score, verdict, red flags, and next_best_action.</span></li>
+            </ol>
+          </div>
+        </section>
+      </div>
+
+      <aside>
+        <section class="module">
+          <div class="module-head">
+            <div>
+              <h3>Request JSON</h3>
+              <p>Send this body to the paid analyze endpoint.</p>
+            </div>
+          </div>
+          <div class="module-body">
+            <pre id="jsonPreview"></pre>
+          </div>
+        </section>
+
+        <section class="module">
+          <div class="module-head">
+            <div>
+              <h3>AgentCash command</h3>
+              <p>Use this from a wallet-funded x402 client.</p>
+            </div>
+          </div>
+          <div class="module-body">
+            <pre id="commandPreview"></pre>
+            <div class="notice">The browser probe may return 402. That is expected: the paid analysis response appears after x402 payment proof is supplied by a compatible client.</div>
+          </div>
+        </section>
+
+        <section class="module">
+          <div class="module-head">
+            <div>
+              <h3>Live result</h3>
+              <p>Shows API status, payment challenge, or paid JSON if your client can complete x402.</p>
+            </div>
+            <span class="pill" id="resultPill">Ready</span>
+          </div>
+          <div class="module-body">
+            <div class="result-box" id="resultBox">Run a probe to check the live endpoint.</div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">BS Man AI - Conversation Risk Intelligence for AI agents.</div>
+</footer>
+
+<script>
+(function(){
+  var endpoint = 'https://api.callbsman.com/v1/analyze';
+  var state = { mode: 'agent_action_check' };
+  var els = {
+    message: document.getElementById('messageText'),
+    proposedAction: document.getElementById('proposedAction'),
+    asset: document.getElementById('asset'),
+    amount: document.getElementById('amount'),
+    recipientType: document.getElementById('recipientType'),
+    channel: document.getElementById('channel'),
+    verificationStatus: document.getElementById('verificationStatus'),
+    safeReply: document.getElementById('safeReply'),
+    patterns: document.getElementById('patterns'),
+    sensitive: document.getElementById('sensitive'),
+    jsonPreview: document.getElementById('jsonPreview'),
+    commandPreview: document.getElementById('commandPreview'),
+    resultBox: document.getElementById('resultBox'),
+    resultPill: document.getElementById('resultPill')
+  };
+
+  function payload(){
+    return {
+      mode: state.mode,
+      input: els.message.value.trim(),
+      context: {
+        proposed_action: els.proposedAction.value,
+        asset: els.asset.value.trim(),
+        amount: els.amount.value.trim(),
+        recipient_type: els.recipientType.value.trim(),
+        channel: els.channel.value.trim(),
+        verification_status: els.verificationStatus.value,
+        sensitive_data_involved: els.sensitive.checked
+      },
+      options: {
+        include_safe_reply: els.safeReply.checked,
+        include_detected_patterns: els.patterns.checked,
+        risk_detail_level: 'standard'
+      },
+      language: 'en',
+      locale: 'US'
+    };
+  }
+
+  function shellQuote(value){
+    return "'" + value.replace(/'/g, "'\"'\"'") + "'";
+  }
+
+  function command(body){
+    return 'npx agentcash@latest fetch ' + endpoint + ' \\\n' +
+      '  -m POST \\\n' +
+      '  -b ' + shellQuote(JSON.stringify(body));
+  }
+
+  function render(){
+    var body = payload();
+    els.jsonPreview.textContent = JSON.stringify(body, null, 2);
+    els.commandPreview.textContent = command(body);
+  }
+
+  function setResult(label, className, html){
+    els.resultPill.textContent = label;
+    els.resultPill.className = 'pill' + (className ? ' ' + className : '');
+    els.resultBox.innerHTML = html;
+  }
+
+  function escapeHtml(text){
+    return String(text).replace(/[&<>"']/g, function(ch){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[ch];
+    });
+  }
+
+  document.querySelectorAll('[data-mode]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      state.mode = btn.getAttribute('data-mode');
+      document.querySelectorAll('[data-mode]').forEach(function(other){ other.classList.remove('active'); });
+      btn.classList.add('active');
+      render();
+    });
+  });
+
+  Object.keys(els).forEach(function(key){
+    var el = els[key];
+    if(!el || !('addEventListener' in el) || key.indexOf('Preview') !== -1 || key.indexOf('result') !== -1) return;
+    el.addEventListener('input', render);
+    el.addEventListener('change', render);
+  });
+
+  document.getElementById('copyJson').addEventListener('click', function(){
+    navigator.clipboard.writeText(JSON.stringify(payload(), null, 2));
+    setResult('Copied', 'ok', '<strong>JSON copied.</strong><br />Paste it into your x402 client or integration.');
+  });
+
+  document.getElementById('copyAgentCash').addEventListener('click', function(){
+    navigator.clipboard.writeText(command(payload()));
+    setResult('Copied', 'ok', '<strong>AgentCash command copied.</strong><br />Run it from a funded AgentCash wallet on Base mainnet.');
+  });
+
+  document.getElementById('runProbe').addEventListener('click', async function(){
+    render();
+    if(!payload().input){
+      setResult('Missing input', 'warn', 'Paste a message or situation first.');
+      return;
+    }
+    setResult('Checking', '', 'Contacting the live endpoint...');
+    try{
+      var res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload())
+      });
+      var text = await res.text();
+      var paymentHeader = res.headers.get('PAYMENT-REQUIRED');
+      var body;
+      try{ body = JSON.parse(text); } catch { body = text; }
+      if(res.status === 402){
+        setResult('Payment required', 'warn',
+          '<strong>HTTP 402 Payment Required.</strong><br />' +
+          'The endpoint is live and protected by x402.<br />' +
+          (paymentHeader ? '<br /><strong>PAYMENT-REQUIRED header:</strong><pre>' + escapeHtml(paymentHeader.slice(0, 900)) + '</pre>' : '') +
+          '<br /><strong>Body:</strong><pre>' + escapeHtml(JSON.stringify(body, null, 2)) + '</pre>');
+        return;
+      }
+      if(res.ok){
+        setResult('Response', 'ok', '<pre>' + escapeHtml(JSON.stringify(body, null, 2)) + '</pre>');
+        return;
+      }
+      setResult('Error', 'warn', '<strong>HTTP ' + res.status + '</strong><pre>' + escapeHtml(JSON.stringify(body, null, 2)) + '</pre>');
+    } catch (error){
+      setResult('Browser blocked', 'warn',
+        '<strong>The browser could not complete the request.</strong><br />This is usually CORS or network policy. Use the AgentCash command above for the paid x402 call.<pre>' +
+        escapeHtml(error && error.message ? error.message : String(error)) + '</pre>');
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

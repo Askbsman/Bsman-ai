@@ -152,6 +152,28 @@ describe("service endpoints", () => {
     );
   });
 
+  test("CORS preflight allows the public console to call the API", async () => {
+    const response = await app.request("/v1/analyze", {
+      method: "OPTIONS",
+      headers: {
+        origin: "https://callbsman.com",
+        "access-control-request-method": "POST",
+        "access-control-request-headers": "content-type"
+      }
+    });
+
+    expect(response.status).toBe(204);
+    expect(response.headers.get("access-control-allow-origin")).toBe(
+      "https://callbsman.com"
+    );
+    expect(response.headers.get("access-control-allow-methods")).toContain(
+      "POST"
+    );
+    expect(response.headers.get("access-control-allow-headers")).toContain(
+      "Content-Type"
+    );
+  });
+
   test("GET /docs/openapi.yaml serves the OpenAPI document", async () => {
     const response = await app.request("/docs/openapi.yaml");
     const body = await response.text();

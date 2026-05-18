@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { readFile } from "node:fs/promises";
 import type { Context, MiddlewareHandler } from "hono";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { analyzeRoute } from "./routes/analyze.js";
 import { createX402Middleware } from "./middleware/x402.js";
 import type { X402Config } from "./config/x402.js";
@@ -20,6 +21,17 @@ export function createApp(options: CreateAppOptions = {}) {
   const app = new Hono();
 
   app.onError((_error, c) => internalError(c));
+
+  app.use(
+    "*",
+    cors({
+      origin: ["https://callbsman.com", "https://www.callbsman.com"],
+      allowMethods: ["GET", "POST", "OPTIONS"],
+      allowHeaders: ["Content-Type", "X-PAYMENT", "Authorization"],
+      exposeHeaders: ["PAYMENT-REQUIRED"],
+      maxAge: 86400
+    })
+  );
 
   app.use("*", options.x402Middleware ?? createX402Middleware(options.x402Config));
 
