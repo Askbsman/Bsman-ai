@@ -12,6 +12,108 @@ const analyzeUrl = `${apiBaseUrl}${analyzePath}`;
 const openApiJsonUrl = `${apiBaseUrl}/openapi.json`;
 const openApiYamlUrl = `${apiBaseUrl}/openapi.yaml`;
 
+const x402Accepts = [
+  {
+    scheme: "exact",
+    network: "eip155:8453",
+    asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    amount: "1000",
+    payTo: "0x7642CCEd89398Bd638d9Ee2F82dA8cd3FC01ADA1",
+    maxTimeoutSeconds: 60,
+    mimeType: bazaarDiscoveryMetadata.mimeType,
+    description: analyzeCapabilityResponse.description,
+    extra: {
+      name: "USD Coin",
+      version: "2",
+      bsman: {
+        name: bazaarDiscoveryMetadata.name,
+        provider: bazaarDiscoveryMetadata.provider,
+        category: bazaarDiscoveryMetadata.category,
+        tags: [...bazaarDiscoveryMetadata.tags],
+        docsUrl: bazaarDiscoveryMetadata.docsUrl,
+        openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
+        githubUrl: bazaarDiscoveryMetadata.githubUrl,
+        mainMode: bazaarDiscoveryMetadata.mainMode,
+        supportedModes: [...bazaarDiscoveryMetadata.supportedModes],
+        fallbackUrl: bazaarDiscoveryMetadata.fallbackUrl
+      }
+    }
+  }
+] as const;
+
+const bazaarAnalyzeExtension = {
+  description: bazaarDiscoveryMetadata.description,
+  category: bazaarDiscoveryMetadata.category,
+  tags: [...bazaarDiscoveryMetadata.tags],
+  provider: bazaarDiscoveryMetadata.provider,
+  docsUrl: bazaarDiscoveryMetadata.docsUrl,
+  openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
+  githubUrl: bazaarDiscoveryMetadata.githubUrl,
+  bodyType: "json",
+  input: analyzeRequestExample,
+  inputSchema: bazaarDiscoveryMetadata.request.schema,
+  output: {
+    example: analyzeResponseExample,
+    schema: bazaarDiscoveryMetadata.response.schema
+  }
+} as const;
+
+const x402AnalyzeResource = {
+  url: analyzeUrl,
+  resource: analyzeUrl,
+  type: "http",
+  method: "POST",
+  description: analyzeCapabilityResponse.description,
+  mimeType: bazaarDiscoveryMetadata.mimeType,
+  accepts: x402Accepts,
+  extensions: {
+    bazaar: bazaarAnalyzeExtension
+  },
+  metadata: {
+    name: bazaarDiscoveryMetadata.name,
+    provider: bazaarDiscoveryMetadata.provider,
+    category: bazaarDiscoveryMetadata.category,
+    tags: [...bazaarDiscoveryMetadata.tags],
+    docsUrl: bazaarDiscoveryMetadata.docsUrl,
+    openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
+    githubUrl: bazaarDiscoveryMetadata.githubUrl,
+    mainMode: bazaarDiscoveryMetadata.mainMode,
+    supportedModes: [...bazaarDiscoveryMetadata.supportedModes],
+    fallbackUrl: bazaarDiscoveryMetadata.fallbackUrl
+  }
+} as const;
+
+export const x402WellKnownManifest = {
+  x402Version: 2,
+  accepts: x402Accepts,
+  resources: [
+    x402AnalyzeResource,
+    {
+      ...x402AnalyzeResource,
+      method: "GET",
+      description: "Paid x402 discovery/capability probe for the analyze resource.",
+      extensions: {
+        bazaar: {
+          description: "Paid x402 discovery/capability probe for the analyze resource.",
+          output: {
+            example: analyzeCapabilityResponse
+          }
+        }
+      }
+    }
+  ],
+  discovery: {
+    name: bazaarDiscoveryMetadata.name,
+    provider: bazaarDiscoveryMetadata.provider,
+    category: bazaarDiscoveryMetadata.category,
+    description: bazaarDiscoveryMetadata.description,
+    docsUrl: bazaarDiscoveryMetadata.docsUrl,
+    openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
+    githubUrl: bazaarDiscoveryMetadata.githubUrl,
+    tags: [...bazaarDiscoveryMetadata.tags]
+  }
+} as const;
+
 export const serviceDiscoveryMetadata = {
   name: "BS Man AI",
   service: "Call BS Man API",

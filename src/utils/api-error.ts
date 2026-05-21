@@ -5,6 +5,7 @@ type ErrorDetails = unknown[] | Record<string, unknown>;
 export type ApiErrorCode =
   | "VALIDATION_ERROR"
   | "UNSUPPORTED_LANGUAGE"
+  | "DEMO_LIMIT_REACHED"
   | "X402_CONFIG_ERROR"
   | "X402_RUNTIME_ERROR"
   | "INTERNAL_ERROR";
@@ -33,6 +34,20 @@ export function unsupportedLanguageError(c: Context) {
       supported_languages: ["en"]
     }),
     400
+  );
+}
+
+export function demoLimitReachedError(c: Context) {
+  return c.json(
+    apiError(
+      "DEMO_LIMIT_REACHED",
+      "Free demo limit reached. Use an x402 paid request to continue.",
+      {
+        free_demo_limit: 3,
+        paid_endpoint: "https://api.callbsman.com/v1/analyze"
+      }
+    ),
+    429
   );
 }
 

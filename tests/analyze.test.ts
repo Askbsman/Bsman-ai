@@ -152,6 +152,183 @@ describe("service endpoints", () => {
     );
   });
 
+  test("GET well-known x402 manifests expose paid analyze resources", async () => {
+    const manifestResponse = await app.request("/.well-known/x402");
+    const jsonManifestResponse = await app.request("/.well-known/x402.json");
+    const manifest = await manifestResponse.json();
+    const jsonManifest = await jsonManifestResponse.json();
+
+    expect(manifestResponse.status).toBe(200);
+    expect(jsonManifestResponse.status).toBe(200);
+    expect(manifest).toEqual(jsonManifest);
+    expect(manifest).toMatchObject({
+      x402Version: 2,
+      discovery: {
+        name: "Call BS Man API",
+        provider: "BS Man AI",
+        category: "Security"
+      }
+    });
+    expect(manifest.resources).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          url: "https://api.callbsman.com/v1/analyze",
+          type: "http",
+          method: "POST",
+          mimeType: "application/json",
+          extensions: {
+            bazaar: expect.any(Object)
+          }
+        }),
+        expect.objectContaining({
+          url: "https://api.callbsman.com/v1/analyze",
+          method: "GET",
+          extensions: {
+            bazaar: expect.any(Object)
+          }
+        })
+      ])
+    );
+    expect(manifest.resources[0].accepts[0]).toMatchObject({
+      scheme: "exact",
+      network: "eip155:8453",
+      amount: "1000",
+      asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      payTo: "0x7642CCEd89398Bd638d9Ee2F82dA8cd3FC01ADA1"
+    });
+    expect(manifest.resources[0].accepts[0].extra.name).toBe("USD Coin");
+    expect(manifest.resources[0].accepts[0].extra.bsman.name).toBe(
+      "Call BS Man API"
+    );
+  });
+
+  test("CORS preflight allows the public console to call the API", async () => {
+    const response = await app.request("/v1/analyze", {
+      method: "OPTIONS",
+      headers: {
+        origin: "https://callbsman.com",
+        "access-control-request-method": "POST",
+        "access-control-request-headers": "content-type"
+      }
+    });
+
+    expect(response.status).toBe(204);
+    expect(response.headers.get("access-control-allow-origin")).toBe(
+      "https://callbsman.com"
+    );
+    expect(response.headers.get("access-control-allow-methods")).toContain(
+      "POST"
+    );
+    expect(response.headers.get("access-control-allow-headers")).toContain(
+      "Content-Type"
+    );
+  });
+
+  test("demo analyze endpoint allows three free checks per client", async () => {
+    const payload = {
+      mode: "agent_action_check",
+      input: "A Telegram admin says I must connect my wallet today or lose access.",
+      context: {
+        proposed_action: "connect_wallet",
+        recipient_type: "telegram_admin",
+        channel: "telegram",
+        verification_status: "unverified"
+      },
+      language: "en",
+      locale: "US"
+    };
+    const headers = {
+      "content-type": "application/json",
+      "x-forwarded-for": "203.0.113.77"
+    };
+
+    for (const remaining of [2, 1, 0]) {
+      const response = await app.request("/v1/demo/analyze", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload)
+      });
+      const body = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(body.risk_score).toBeGreaterThanOrEqual(0);
+      expect(body.demo).toMatchObject({
+        free: true,
+        limit: 3,
+        remaining
+      });
+    }
+
+    const limitedResponse = await app.request("/v1/demo/analyze", {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload)
+    });
+    const limitedBody = await limitedResponse.json();
+
+    expect(limitedResponse.status).toBe(429);
+    expect(limitedBody.error.code).toBe("DEMO_LIMIT_REACHED");
+  });
+
+  test("GET demo analyze endpoint explains how to use the free demo", async () => {
+    const response = await app.request("/v1/demo/analyze");
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      service: "Call BS Man API",
+      endpoint: "POST /v1/demo/analyze",
+      free_demo: {
+        enabled: true,
+        limit: 3
+      },
+      paid_endpoint: "POST https://api.callbsman.com/v1/analyze"
+    });
+  });
+
+  test("demo analyze endpoint remains free when x402 is enabled", async () => {
+    const protectedApp = createApp({
+      x402Config: {
+        ...validX402Config,
+        enabled: true
+      },
+      x402Middleware: createX402Middleware(
+        {
+          ...validX402Config,
+          enabled: true
+        },
+        {
+          createProtectedMiddleware: () => ({
+            initialize: async () => undefined,
+            handler: async (c, next) => {
+              if (c.req.path === "/v1/analyze") {
+                return c.json({ error: "Payment required" }, 402);
+              }
+              await next();
+            }
+          })
+        }
+      )
+    });
+
+    const response = await protectedApp.request("/v1/demo/analyze", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-forwarded-for": "203.0.113.78"
+      },
+      body: JSON.stringify({
+        mode: "scam_check",
+        input: "Guaranteed crypto returns if I send money now.",
+        language: "en"
+      })
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.demo.remaining).toBe(2);
+  });
+
   test("GET /docs/openapi.yaml serves the OpenAPI document", async () => {
     const response = await app.request("/docs/openapi.yaml");
     const body = await response.text();

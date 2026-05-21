@@ -2,12 +2,14 @@ import { serve } from "@hono/node-server";
 import { readFile } from "node:fs/promises";
 import type { Context, MiddlewareHandler } from "hono";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { analyzeRoute } from "./routes/analyze.js";
 import { createX402Middleware } from "./middleware/x402.js";
 import type { X402Config } from "./config/x402.js";
 import {
   openApiJsonDocument,
-  serviceDiscoveryMetadata
+  serviceDiscoveryMetadata,
+  x402WellKnownManifest
 } from "./config/service-discovery.js";
 import { internalError } from "./utils/api-error.js";
 
@@ -21,9 +23,22 @@ export function createApp(options: CreateAppOptions = {}) {
 
   app.onError((_error, c) => internalError(c));
 
+  app.use(
+    "*",
+    cors({
+      origin: ["https://callbsman.com", "https://www.callbsman.com", "null"],
+      allowMethods: ["GET", "POST", "OPTIONS"],
+      allowHeaders: ["Content-Type", "X-PAYMENT", "Authorization"],
+      exposeHeaders: ["PAYMENT-REQUIRED"],
+      maxAge: 86400
+    })
+  );
+
   app.use("*", options.x402Middleware ?? createX402Middleware(options.x402Config));
 
   app.get("/", (c) => c.json(serviceDiscoveryMetadata));
+  app.get("/.well-known/x402", (c) => c.json(x402WellKnownManifest));
+  app.get("/.well-known/x402.json", (c) => c.json(x402WellKnownManifest));
 
   app.get("/health", (c) =>
     c.json({
