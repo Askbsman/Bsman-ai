@@ -85,6 +85,8 @@ const x402AnalyzeResource = {
 
 export const x402WellKnownManifest = {
   x402Version: 2,
+  name: bazaarDiscoveryMetadata.name,
+  description: bazaarDiscoveryMetadata.description,
   accepts: x402Accepts,
   resources: [
     x402AnalyzeResource,
