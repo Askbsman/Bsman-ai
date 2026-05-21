@@ -8,7 +8,8 @@ import { createX402Middleware } from "./middleware/x402.js";
 import type { X402Config } from "./config/x402.js";
 import {
   openApiJsonDocument,
-  serviceDiscoveryMetadata
+  serviceDiscoveryMetadata,
+  x402WellKnownManifest
 } from "./config/service-discovery.js";
 import { internalError } from "./utils/api-error.js";
 
@@ -36,6 +37,8 @@ export function createApp(options: CreateAppOptions = {}) {
   app.use("*", options.x402Middleware ?? createX402Middleware(options.x402Config));
 
   app.get("/", (c) => c.json(serviceDiscoveryMetadata));
+  app.get("/.well-known/x402", (c) => c.json(x402WellKnownManifest));
+  app.get("/.well-known/x402.json", (c) => c.json(x402WellKnownManifest));
 
   app.get("/health", (c) =>
     c.json({

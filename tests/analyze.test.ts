@@ -152,6 +152,56 @@ describe("service endpoints", () => {
     );
   });
 
+  test("GET well-known x402 manifests expose paid analyze resources", async () => {
+    const manifestResponse = await app.request("/.well-known/x402");
+    const jsonManifestResponse = await app.request("/.well-known/x402.json");
+    const manifest = await manifestResponse.json();
+    const jsonManifest = await jsonManifestResponse.json();
+
+    expect(manifestResponse.status).toBe(200);
+    expect(jsonManifestResponse.status).toBe(200);
+    expect(manifest).toEqual(jsonManifest);
+    expect(manifest).toMatchObject({
+      x402Version: 2,
+      discovery: {
+        name: "Call BS Man API",
+        provider: "BS Man AI",
+        category: "Security"
+      }
+    });
+    expect(manifest.resources).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          url: "https://api.callbsman.com/v1/analyze",
+          type: "http",
+          method: "POST",
+          mimeType: "application/json",
+          extensions: {
+            bazaar: expect.any(Object)
+          }
+        }),
+        expect.objectContaining({
+          url: "https://api.callbsman.com/v1/analyze",
+          method: "GET",
+          extensions: {
+            bazaar: expect.any(Object)
+          }
+        })
+      ])
+    );
+    expect(manifest.resources[0].accepts[0]).toMatchObject({
+      scheme: "exact",
+      network: "eip155:8453",
+      amount: "1000",
+      asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      payTo: "0x7642CCEd89398Bd638d9Ee2F82dA8cd3FC01ADA1"
+    });
+    expect(manifest.resources[0].accepts[0].extra.name).toBe("USD Coin");
+    expect(manifest.resources[0].accepts[0].extra.bsman.name).toBe(
+      "Call BS Man API"
+    );
+  });
+
   test("CORS preflight allows the public console to call the API", async () => {
     const response = await app.request("/v1/analyze", {
       method: "OPTIONS",
