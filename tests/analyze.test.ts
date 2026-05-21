@@ -417,6 +417,9 @@ describe("x402 endpoint policy", () => {
       }
     });
     expect(route.extensions?.bazaar).toMatchObject({
+      name: "Call BS Man API",
+      description:
+        "Call BS Man API analyzes chats, offers, and proposed agent actions for scam signals, manipulation tactics, unsafe payment requests, wallet/payment risk, and risky next steps. It returns structured JSON with risk_score, risk_level, detected_patterns, red_flags, verdict, requires_human_review, and next_best_action.",
       info: {
         input: {
           type: "http",
@@ -493,7 +496,11 @@ describe("x402 endpoint policy", () => {
         }
       ],
       extensions: {
-        bazaar: expect.any(Object)
+        bazaar: {
+          name: "Call BS Man API",
+          description:
+            "Call BS Man API analyzes chats, offers, and proposed agent actions for scam signals, manipulation tactics, unsafe payment requests, wallet/payment risk, and risky next steps. It returns structured JSON with risk_score, risk_level, detected_patterns, red_flags, verdict, requires_human_review, and next_best_action."
+        }
       },
       metadata: {
         name: "Call BS Man API",
@@ -518,7 +525,13 @@ describe("x402 endpoint policy", () => {
         }
       ],
       method: "GET",
-      endpoint: "GET https://api.callbsman.com/v1/analyze"
+      endpoint: "GET https://api.callbsman.com/v1/analyze",
+      extensions: {
+        bazaar: {
+          name: "Call BS Man API",
+          description: "Paid x402 discovery/capability probe for the analyze resource."
+        }
+      }
     });
     expectSafeError(responseBody?.body);
   });
