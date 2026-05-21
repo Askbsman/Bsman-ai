@@ -234,7 +234,7 @@ export const analyzeCapabilityResponse = {
 } as const;
 
 export function createBazaarAnalyzeDiscoveryExtensions() {
-  return declareDiscoveryExtension({
+  const extension = declareDiscoveryExtension({
     bodyType: "json",
     input: analyzeRequestExample,
     inputSchema: analyzeRequestDiscoverySchema,
@@ -243,10 +243,19 @@ export function createBazaarAnalyzeDiscoveryExtensions() {
       schema: analyzeResponseDiscoverySchema
     }
   });
+
+  return {
+    ...extension,
+    bazaar: {
+      name: bazaarDiscoveryMetadata.name,
+      description: bazaarDiscoveryMetadata.description,
+      ...extension.bazaar
+    }
+  };
 }
 
 export function createBazaarCapabilityDiscoveryExtensions() {
-  return declareDiscoveryExtension({
+  const extension = declareDiscoveryExtension({
     output: {
       example: analyzeCapabilityResponse,
       schema: {
@@ -265,4 +274,13 @@ export function createBazaarCapabilityDiscoveryExtensions() {
       }
     }
   });
+
+  return {
+    ...extension,
+    bazaar: {
+      name: bazaarDiscoveryMetadata.name,
+      description: "Paid x402 discovery/capability probe for the analyze resource.",
+      ...extension.bazaar
+    }
+  };
 }
