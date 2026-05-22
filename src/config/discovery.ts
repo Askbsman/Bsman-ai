@@ -197,6 +197,7 @@ export const bazaarDiscoveryMetadata = {
   docsUrl: "https://callbsman.com",
   openApiUrl: "https://api.callbsman.com/docs/openapi.yaml",
   githubUrl: "https://github.com/Askbsman/Bsman-ai",
+  iconUrl: "https://callbsman.com/assets/fav.png",
   mimeType: "application/json",
   mainMode: "agent_action_check",
   supportedModes: analyzeModes,
@@ -248,7 +249,10 @@ export function createBazaarAnalyzeDiscoveryExtensions() {
     ...extension,
     bazaar: {
       name: bazaarDiscoveryMetadata.name,
+      serviceName: bazaarDiscoveryMetadata.name,
       description: bazaarDiscoveryMetadata.description,
+      tags: [...bazaarDiscoveryMetadata.tags],
+      iconUrl: bazaarDiscoveryMetadata.iconUrl,
       ...extension.bazaar
     }
   };
@@ -279,7 +283,10 @@ export function createBazaarCapabilityDiscoveryExtensions() {
     ...extension,
     bazaar: {
       name: bazaarDiscoveryMetadata.name,
+      serviceName: bazaarDiscoveryMetadata.name,
       description: "Paid x402 discovery/capability probe for the analyze resource.",
+      tags: [...bazaarDiscoveryMetadata.tags],
+      iconUrl: bazaarDiscoveryMetadata.iconUrl,
       ...extension.bazaar
     }
   };

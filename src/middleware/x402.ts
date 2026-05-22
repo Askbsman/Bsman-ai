@@ -50,6 +50,9 @@ export function createX402PaymentRequiredBody(
   return buildAnalyzePaymentRequirements(config).then((accepts) => ({
     x402Version: 2,
     error: "Payment required",
+    serviceName: bazaarDiscoveryMetadata.name,
+    tags: [...bazaarDiscoveryMetadata.tags],
+    iconUrl: bazaarDiscoveryMetadata.iconUrl,
     resource,
     accepts,
     extensions:
@@ -81,6 +84,7 @@ export function createX402PaymentRequiredBody(
       docsUrl: bazaarDiscoveryMetadata.docsUrl,
       openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
       githubUrl: bazaarDiscoveryMetadata.githubUrl,
+      iconUrl: bazaarDiscoveryMetadata.iconUrl,
       mainMode: bazaarDiscoveryMetadata.mainMode,
       supportedModes: [...bazaarDiscoveryMetadata.supportedModes],
       tags: [...bazaarDiscoveryMetadata.tags],
@@ -114,6 +118,7 @@ function createAnalyzePaymentOption(config: X402Config): AnalyzePaymentOption {
         docsUrl: bazaarDiscoveryMetadata.docsUrl,
         openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
         githubUrl: bazaarDiscoveryMetadata.githubUrl,
+        iconUrl: bazaarDiscoveryMetadata.iconUrl,
         mainMode: bazaarDiscoveryMetadata.mainMode,
         supportedModes: [...bazaarDiscoveryMetadata.supportedModes],
         fallbackUrl: bazaarDiscoveryMetadata.fallbackUrl

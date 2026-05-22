@@ -164,8 +164,11 @@ describe("service endpoints", () => {
     expect(manifest).toMatchObject({
       x402Version: 2,
       name: "Call BS Man API",
+      serviceName: "Call BS Man API",
       description:
         "Call BS Man API analyzes chats, offers, and proposed agent actions for scam signals, manipulation tactics, unsafe payment requests, wallet/payment risk, and risky next steps. It returns structured JSON with risk_score, risk_level, detected_patterns, red_flags, verdict, requires_human_review, and next_best_action.",
+      tags: expect.arrayContaining(["x402", "AI agents", "AgentCash"]),
+      iconUrl: "https://callbsman.com/assets/fav.png",
       discovery: {
         name: "Call BS Man API",
         provider: "BS Man AI",
@@ -203,6 +206,11 @@ describe("service endpoints", () => {
     expect(manifest.resources[0].accepts[0].extra.bsman.name).toBe(
       "Call BS Man API"
     );
+    expect(manifest.resources[0].extensions.bazaar).toMatchObject({
+      serviceName: "Call BS Man API",
+      iconUrl: "https://callbsman.com/assets/fav.png",
+      tags: expect.arrayContaining(["x402", "AI agents", "AgentCash"])
+    });
   });
 
   test("CORS preflight allows the public console to call the API", async () => {
@@ -418,8 +426,11 @@ describe("x402 endpoint policy", () => {
     });
     expect(route.extensions?.bazaar).toMatchObject({
       name: "Call BS Man API",
+      serviceName: "Call BS Man API",
       description:
         "Call BS Man API analyzes chats, offers, and proposed agent actions for scam signals, manipulation tactics, unsafe payment requests, wallet/payment risk, and risky next steps. It returns structured JSON with risk_score, risk_level, detected_patterns, red_flags, verdict, requires_human_review, and next_best_action.",
+      tags: expect.arrayContaining(["x402", "AI agents", "AgentCash"]),
+      iconUrl: "https://callbsman.com/assets/fav.png",
       info: {
         input: {
           type: "http",
@@ -471,6 +482,9 @@ describe("x402 endpoint policy", () => {
     expect(responseBody?.body).toMatchObject({
       x402Version: 2,
       error: "Payment required",
+      serviceName: "Call BS Man API",
+      tags: expect.arrayContaining(["x402", "AI agents", "AgentCash"]),
+      iconUrl: "https://callbsman.com/assets/fav.png",
       resource: {
         url: "https://api.callbsman.com/v1/analyze",
         mimeType: "application/json"
@@ -498,6 +512,9 @@ describe("x402 endpoint policy", () => {
       extensions: {
         bazaar: {
           name: "Call BS Man API",
+          serviceName: "Call BS Man API",
+          tags: expect.arrayContaining(["x402", "AI agents", "AgentCash"]),
+          iconUrl: "https://callbsman.com/assets/fav.png",
           description:
             "Call BS Man API analyzes chats, offers, and proposed agent actions for scam signals, manipulation tactics, unsafe payment requests, wallet/payment risk, and risky next steps. It returns structured JSON with risk_score, risk_level, detected_patterns, red_flags, verdict, requires_human_review, and next_best_action."
         }
@@ -529,6 +546,9 @@ describe("x402 endpoint policy", () => {
       extensions: {
         bazaar: {
           name: "Call BS Man API",
+          serviceName: "Call BS Man API",
+          tags: expect.arrayContaining(["x402", "AI agents", "AgentCash"]),
+          iconUrl: "https://callbsman.com/assets/fav.png",
           description: "Paid x402 discovery/capability probe for the analyze resource."
         }
       }

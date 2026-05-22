@@ -33,6 +33,7 @@ const x402Accepts = [
         docsUrl: bazaarDiscoveryMetadata.docsUrl,
         openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
         githubUrl: bazaarDiscoveryMetadata.githubUrl,
+        iconUrl: bazaarDiscoveryMetadata.iconUrl,
         mainMode: bazaarDiscoveryMetadata.mainMode,
         supportedModes: [...bazaarDiscoveryMetadata.supportedModes],
         fallbackUrl: bazaarDiscoveryMetadata.fallbackUrl
@@ -43,6 +44,8 @@ const x402Accepts = [
 
 const bazaarAnalyzeExtension = {
   description: bazaarDiscoveryMetadata.description,
+  serviceName: bazaarDiscoveryMetadata.name,
+  iconUrl: bazaarDiscoveryMetadata.iconUrl,
   category: bazaarDiscoveryMetadata.category,
   tags: [...bazaarDiscoveryMetadata.tags],
   provider: bazaarDiscoveryMetadata.provider,
@@ -77,6 +80,7 @@ const x402AnalyzeResource = {
     docsUrl: bazaarDiscoveryMetadata.docsUrl,
     openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
     githubUrl: bazaarDiscoveryMetadata.githubUrl,
+    iconUrl: bazaarDiscoveryMetadata.iconUrl,
     mainMode: bazaarDiscoveryMetadata.mainMode,
     supportedModes: [...bazaarDiscoveryMetadata.supportedModes],
     fallbackUrl: bazaarDiscoveryMetadata.fallbackUrl
@@ -86,7 +90,10 @@ const x402AnalyzeResource = {
 export const x402WellKnownManifest = {
   x402Version: 2,
   name: bazaarDiscoveryMetadata.name,
+  serviceName: bazaarDiscoveryMetadata.name,
   description: bazaarDiscoveryMetadata.description,
+  tags: [...bazaarDiscoveryMetadata.tags],
+  iconUrl: bazaarDiscoveryMetadata.iconUrl,
   accepts: x402Accepts,
   resources: [
     x402AnalyzeResource,
@@ -96,7 +103,11 @@ export const x402WellKnownManifest = {
       description: "Paid x402 discovery/capability probe for the analyze resource.",
       extensions: {
         bazaar: {
+          name: bazaarDiscoveryMetadata.name,
+          serviceName: bazaarDiscoveryMetadata.name,
           description: "Paid x402 discovery/capability probe for the analyze resource.",
+          tags: [...bazaarDiscoveryMetadata.tags],
+          iconUrl: bazaarDiscoveryMetadata.iconUrl,
           output: {
             example: analyzeCapabilityResponse
           }
@@ -112,6 +123,7 @@ export const x402WellKnownManifest = {
     docsUrl: bazaarDiscoveryMetadata.docsUrl,
     openApiUrl: bazaarDiscoveryMetadata.openApiUrl,
     githubUrl: bazaarDiscoveryMetadata.githubUrl,
+    iconUrl: bazaarDiscoveryMetadata.iconUrl,
     tags: [...bazaarDiscoveryMetadata.tags]
   }
 } as const;
@@ -127,6 +139,7 @@ export const serviceDiscoveryMetadata = {
   openapi_json: openApiJsonUrl,
   openapi_yaml: openApiYamlUrl,
   github: bazaarDiscoveryMetadata.githubUrl,
+  icon: bazaarDiscoveryMetadata.iconUrl,
   endpoints: {
     health: "/health",
     analyze: analyzePath,
@@ -162,6 +175,7 @@ export const serviceDiscoveryMetadata = {
       response: analyzeResponseExample,
       tags: [...bazaarDiscoveryMetadata.tags],
       docs: bazaarDiscoveryMetadata.docsUrl,
+      icon: bazaarDiscoveryMetadata.iconUrl,
       openapi: openApiJsonUrl
     }
   ],
@@ -230,6 +244,7 @@ export const openApiJsonDocument = {
       resourceUrl: analyzeUrl,
       docsUrl: bazaarDiscoveryMetadata.docsUrl,
       githubUrl: bazaarDiscoveryMetadata.githubUrl,
+      iconUrl: bazaarDiscoveryMetadata.iconUrl,
       cdpIndexingLimitation: bazaarDiscoveryMetadata.cdpIndexingLimitation
     }
   },
