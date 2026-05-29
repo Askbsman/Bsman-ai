@@ -103,6 +103,8 @@ CDP_API_KEY_ID=<set in Render only>
 CDP_API_KEY_SECRET=<set in Render only>
 ```
 
+If the CDP key is delivered as `cdp_api_key.json`, set `CDP_API_KEY_ID` from JSON `id` and `CDP_API_KEY_SECRET` from JSON `privateKey`.
+
 After Render redeploys:
 
 ```bash

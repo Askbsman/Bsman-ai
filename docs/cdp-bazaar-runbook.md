@@ -32,6 +32,11 @@ CDP_API_KEY_ID=<set in Render only>
 CDP_API_KEY_SECRET=<set in Render only>
 ```
 
+If the CDP key arrives as `cdp_api_key.json`, map it like this:
+
+- JSON `id` -> Render `CDP_API_KEY_ID`
+- JSON `privateKey` -> Render `CDP_API_KEY_SECRET`
+
 Do not change the price, `payTo`, network, asset, endpoint URL, or Bazaar metadata during the CDP run.
 
 ## Preflight
