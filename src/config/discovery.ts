@@ -5,7 +5,7 @@ const analyzeUrl = "https://api.callbsman.com/v1/analyze";
 const fallbackAnalyzeUrl = "https://bsman-ai.onrender.com/v1/analyze";
 
 export const bazaarIndexingLimitationNote =
-  "BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Official Coinbase Bazaar auto-indexing may require CDP Facilitator settlement. The current production endpoint uses xpay facilitator on Base mainnet because CDP onboarding is not available in the current setup.";
+  "BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Coinbase Bazaar indexing may require at least one successful paid settlement through the CDP Facilitator. CDP credentials must be configured only as runtime secrets; no CDP secrets belong in source control.";
 
 export const bazaarTags = [
   "x402",

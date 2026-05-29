@@ -71,12 +71,12 @@ GET https://api.callbsman.com/docs/openapi.yaml
 - Paid discovery probe: `GET /v1/analyze`
 - Paid analysis endpoint: `POST /v1/analyze`
 - MIME type: `application/json`
-- Current facilitator: xpay facilitator on Base mainnet
+- Facilitator: runtime-configurable; use CDP Facilitator for the Bazaar indexing run
 - Unpaid 402 response: the `PAYMENT-REQUIRED` header is canonical. The JSON body mirrors the same PaymentRequired payload for clients that read the body.
 
 ## Discovery And Indexing Note
 
-BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Official Coinbase Bazaar auto-indexing may require CDP Facilitator settlement. The current production endpoint uses xpay facilitator on Base mainnet because CDP onboarding is not available in the current setup.
+BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Coinbase Bazaar indexing may require at least one successful paid settlement through the CDP Facilitator. CDP credentials must be configured only as runtime secrets; no CDP secrets belong in source control.
 
 This profile is intended for manual submission and public distribution. It does not claim an official listing, partnership, certification, endorsement, customer usage metric, or registry acceptance.
 
@@ -235,5 +235,5 @@ Call BS Man API is an x402-paid Conversation Risk Intelligence API for AI agents
 - Free OpenAPI YAML endpoint: `https://api.callbsman.com/openapi.yaml`
 - x402 network: Base mainnet
 - Price: `$0.001` per analyze request
-- Current facilitator: xpay facilitator
+- Facilitator: runtime-configurable; CDP Facilitator is used for Bazaar indexing runs
 - Buyer smoke test: AgentCash paid request has succeeded, with evidence recorded in `docs/stage-1-paid-request-result.md`

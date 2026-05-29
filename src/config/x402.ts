@@ -1,8 +1,13 @@
+export type X402FacilitatorProvider = "http" | "cdp";
+
 export type X402Config = {
   enabled: boolean;
   network: string;
   payTo: string;
   facilitatorUrl: string;
+  facilitatorProvider?: X402FacilitatorProvider;
+  cdpApiKeyId?: string;
+  cdpApiKeySecret?: string;
   analyzePriceUsd: string;
   agentActionPriceUsd: string;
 };
@@ -17,6 +22,8 @@ const networkAliases: Record<string, string> = {
   "base-sepolia": "eip155:84532",
   base: "eip155:8453"
 };
+
+const facilitatorProviders = new Set<X402FacilitatorProvider>(["http", "cdp"]);
 
 function envValue(name: string, fallback = ""): string {
   return process.env[name]?.trim() || fallback;
@@ -51,6 +58,7 @@ export function isEvmAddress(value: string): boolean {
 export function validateX402Config(config: X402Config): X402ConfigValidation {
   const missing: string[] = [];
   const invalid: string[] = [];
+  const facilitatorProvider = config.facilitatorProvider ?? "http";
 
   if (typeof config.enabled !== "boolean") {
     invalid.push("X402_ENABLED");
@@ -82,6 +90,20 @@ export function validateX402Config(config: X402Config): X402ConfigValidation {
     invalid.push("X402_FACILITATOR_URL");
   }
 
+  if (!facilitatorProviders.has(facilitatorProvider)) {
+    invalid.push("X402_FACILITATOR_PROVIDER");
+  }
+
+  if (facilitatorProvider === "cdp") {
+    if (!config.cdpApiKeyId) {
+      missing.push("CDP_API_KEY_ID");
+    }
+
+    if (!config.cdpApiKeySecret) {
+      missing.push("CDP_API_KEY_SECRET");
+    }
+  }
+
   if (!config.analyzePriceUsd) {
     missing.push("X402_PRICE_ANALYZE_USD");
   } else if (!isPositivePrice(config.analyzePriceUsd)) {
@@ -104,12 +126,16 @@ export function validateX402Config(config: X402Config): X402ConfigValidation {
 export function readX402Config(): X402Config {
   const enabled = envValue("X402_ENABLED", "false").toLowerCase() === "true";
   const network = envValue("X402_NETWORK", enabled ? "" : "base-sepolia");
+  const facilitatorProvider = envValue("X402_FACILITATOR_PROVIDER", "http").toLowerCase();
 
   return {
     enabled,
     network: networkAliases[network] ?? network,
     payTo: envValue("X402_PAY_TO"),
     facilitatorUrl: envValue("X402_FACILITATOR_URL"),
+    facilitatorProvider: facilitatorProvider as X402FacilitatorProvider,
+    cdpApiKeyId: envValue("CDP_API_KEY_ID"),
+    cdpApiKeySecret: envValue("CDP_API_KEY_SECRET"),
     analyzePriceUsd: envValue("X402_PRICE_ANALYZE_USD", "0.001"),
     agentActionPriceUsd: envValue("X402_PRICE_AGENT_ACTION_USD", "0.005")
   };

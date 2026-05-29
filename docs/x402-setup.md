@@ -59,9 +59,7 @@ Discovery validators may probe GET /v1/analyze. BS Man AI supports GET /v1/analy
 - OpenAPI `x-payment-info`: fixed USD price and x402 protocol annotations for AgentCash-style discovery
 - Public canonical metadata: `docs/bazaar-metadata.json`
 
-BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Official Coinbase Bazaar auto-indexing may require CDP Facilitator settlement. The current production endpoint uses xpay facilitator on Base mainnet because CDP onboarding is not available in the current setup.
-
-Stage 1.5 does not switch facilitators, add CDP secrets, change pricing, or change Render environment variables. TODO: activate CDP/Bazaar auto-indexing only after CDP onboarding and CDP Facilitator settlement are available and tested.
+BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Coinbase Bazaar indexing may require at least one successful paid settlement through the CDP Facilitator. CDP credentials must be configured only as runtime secrets; no CDP secrets belong in source control.
 
 ## Environment Variables
 
@@ -69,9 +67,12 @@ Stage 1.5 does not switch facilitators, add CDP secrets, change pricing, or chan
 X402_ENABLED=false
 X402_NETWORK=base-sepolia
 X402_PAY_TO=
+X402_FACILITATOR_PROVIDER=http
 X402_FACILITATOR_URL=
 X402_PRICE_ANALYZE_USD=0.001
 X402_PRICE_AGENT_ACTION_USD=0.005
+CDP_API_KEY_ID=
+CDP_API_KEY_SECRET=
 ```
 
 Mappings:
@@ -79,8 +80,42 @@ Mappings:
 - `X402_NETWORK=base-sepolia` maps to `eip155:84532`
 - `X402_NETWORK=base` maps to `eip155:8453`
 - CAIP-2 values such as `eip155:84532` can also be used directly
+- `X402_FACILITATOR_PROVIDER=http` uses the configured facilitator URL without extra auth headers.
+- `X402_FACILITATOR_PROVIDER=cdp` uses the configured CDP Facilitator URL and signs `supported`, `verify`, and `settle` requests with `CDP_API_KEY_ID` and `CDP_API_KEY_SECRET`.
 
 `X402_PRICE_AGENT_ACTION_USD` is documented for pricing policy and future split endpoints. The current middleware protects `GET /v1/analyze` and all `POST /v1/analyze` modes with `X402_PRICE_ANALYZE_USD`.
+
+## CDP/Bazaar Production Run
+
+Use this only for a controlled Bazaar indexing run. Do not paste CDP credentials into chat, GitHub, issues, PRs, screenshots, or docs.
+
+Render environment variables:
+
+```text
+X402_ENABLED=true
+X402_NETWORK=base
+X402_PAY_TO=0x7642CCEd89398Bd638d9Ee2F82dA8cd3FC01ADA1
+X402_FACILITATOR_PROVIDER=cdp
+X402_FACILITATOR_URL=https://api.cdp.coinbase.com/platform/v2/x402
+X402_PRICE_ANALYZE_USD=0.001
+X402_PRICE_AGENT_ACTION_USD=0.005
+CDP_API_KEY_ID=<set in Render only>
+CDP_API_KEY_SECRET=<set in Render only>
+```
+
+After Render redeploys:
+
+```bash
+npm run bazaar:smoke -- https://api.callbsman.com
+```
+
+Then run one real paid request through an x402 buyer, and check Bazaar indexing:
+
+```bash
+npx x402trace bazaar-check https://api.callbsman.com/v1/analyze --chain base
+```
+
+The smoke check is unpaid. It verifies free endpoints, `/.well-known/x402`, unpaid `GET /v1/analyze`, unpaid `POST /v1/analyze`, the `PAYMENT-REQUIRED` header, the Base USDC payment fields, and Bazaar identity fields.
 
 ## Testnet Checklist
 

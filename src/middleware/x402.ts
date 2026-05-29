@@ -22,6 +22,7 @@ import {
   readX402Config,
   validateX402Config
 } from "../config/x402.js";
+import { createCdpFacilitatorAuthHeaders } from "../utils/cdp-auth.js";
 import { x402ConfigError, x402RuntimeError } from "../utils/api-error.js";
 
 function noopMiddleware(): MiddlewareHandler {
@@ -265,9 +266,20 @@ export function createX402AnalyzeRoutes(config: X402Config) {
 
 function createOfficialProtectedMiddleware(config: X402Config): ProtectedPaymentMiddleware {
   const network = config.network as `${string}:${string}`;
-  const facilitatorClient = new HTTPFacilitatorClient({
-    url: config.facilitatorUrl
-  });
+  const facilitatorClient =
+    config.facilitatorProvider === "cdp"
+      ? new HTTPFacilitatorClient({
+          url: config.facilitatorUrl,
+          createAuthHeaders: () =>
+            createCdpFacilitatorAuthHeaders({
+              facilitatorUrl: config.facilitatorUrl,
+              apiKeyId: config.cdpApiKeyId ?? "",
+              apiKeySecret: config.cdpApiKeySecret ?? ""
+            })
+        })
+      : new HTTPFacilitatorClient({
+          url: config.facilitatorUrl
+        });
   const resourceServer = new x402ResourceServer(facilitatorClient)
     .register(network, new ExactEvmScheme())
     .registerExtension(bazaarResourceServerExtension);

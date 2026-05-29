@@ -35,13 +35,14 @@ Discovery metadata:
 
 - Bazaar metadata: `docs/bazaar-metadata.json`
 - Bazaar listing: `docs/bazaar-listing.md`
+- CDP/Bazaar runbook: `docs/cdp-bazaar-runbook.md`
 - OpenAPI JSON: `https://api.callbsman.com/openapi.json`
 - OpenAPI YAML: `https://api.callbsman.com/openapi.yaml`
 - Resource URL: `https://api.callbsman.com/v1/analyze`
 
 The API root at `https://api.callbsman.com/` returns agent-friendly resource metadata, including the paid analyze resource, sample endpoints, x402 payment details, and OpenAPI links.
 
-BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Official Coinbase Bazaar auto-indexing may require CDP Facilitator settlement. The current production endpoint uses xpay facilitator on Base mainnet because CDP onboarding is not available in the current setup.
+BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Coinbase Bazaar indexing may require at least one successful paid settlement through the CDP Facilitator. Use `X402_FACILITATOR_PROVIDER=cdp` only with runtime CDP secrets in Render; never commit CDP credentials.
 
 Free endpoints:
 

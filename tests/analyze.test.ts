@@ -1,6 +1,10 @@
 import { describe, expect, test, vi } from "vitest";
 import app, { createApp } from "../src/server.js";
-import type { X402Config } from "../src/config/x402.js";
+import {
+  readX402Config,
+  validateX402Config,
+  type X402Config
+} from "../src/config/x402.js";
 import { bazaarDiscoveryMetadata } from "../src/config/discovery.js";
 import {
   createX402AnalyzeRoutes,
@@ -799,6 +803,44 @@ describe("x402 endpoint policy", () => {
     expect(body.error.code).toBe("X402_CONFIG_ERROR");
     expect(body.error.details.missing).toContain("X402_FACILITATOR_URL");
     expectSafeError(body);
+  });
+
+  test("CDP facilitator mode requires CDP API credentials", () => {
+    const validation = validateX402Config({
+      ...validX402Config,
+      facilitatorProvider: "cdp",
+      facilitatorUrl: "https://api.cdp.coinbase.com/platform/v2/x402"
+    });
+
+    expect(validation.valid).toBe(false);
+    expect(validation.missing).toEqual(
+      expect.arrayContaining(["CDP_API_KEY_ID", "CDP_API_KEY_SECRET"])
+    );
+  });
+
+  test("readX402Config prepares CDP facilitator mode from env", () => {
+    const previousEnv = { ...process.env };
+    process.env.X402_ENABLED = "true";
+    process.env.X402_NETWORK = "base";
+    process.env.X402_PAY_TO = "0x7642CCEd89398Bd638d9Ee2F82dA8cd3FC01ADA1";
+    process.env.X402_FACILITATOR_PROVIDER = "cdp";
+    process.env.X402_FACILITATOR_URL = "https://api.cdp.coinbase.com/platform/v2/x402";
+    process.env.CDP_API_KEY_ID = "test-cdp-key-id";
+    process.env.CDP_API_KEY_SECRET = "test-cdp-key-secret";
+
+    try {
+      expect(readX402Config()).toMatchObject({
+        enabled: true,
+        network: "eip155:8453",
+        payTo: "0x7642CCEd89398Bd638d9Ee2F82dA8cd3FC01ADA1",
+        facilitatorProvider: "cdp",
+        facilitatorUrl: "https://api.cdp.coinbase.com/platform/v2/x402",
+        cdpApiKeyId: "test-cdp-key-id",
+        cdpApiKeySecret: "test-cdp-key-secret"
+      });
+    } finally {
+      process.env = previousEnv;
+    }
   });
 
   test("enabled x402 with missing network returns a safe config error", async () => {

@@ -30,9 +30,12 @@ NODE_ENV=development
 X402_ENABLED=false
 X402_NETWORK=base-sepolia
 X402_PAY_TO=
+X402_FACILITATOR_PROVIDER=http
 X402_FACILITATOR_URL=
 X402_PRICE_ANALYZE_USD=0.001
 X402_PRICE_AGENT_ACTION_USD=0.005
+CDP_API_KEY_ID=
+CDP_API_KEY_SECRET=
 ```
 
 ## Build
@@ -98,6 +101,8 @@ If `POST /v1/analyze` returns `500` after `X402_ENABLED=true`:
 
 - Check `X402_PAY_TO` is set in Render and looks like a 42-character EVM address beginning with `0x`.
 - Check `X402_FACILITATOR_URL` is set and is a valid URL, for example a testnet facilitator URL during Base Sepolia testing.
+- Check `X402_FACILITATOR_PROVIDER` is `http` or `cdp`.
+- If `X402_FACILITATOR_PROVIDER=cdp`, set `CDP_API_KEY_ID` and `CDP_API_KEY_SECRET` in Render only.
 - Check `X402_NETWORK` is set. `base-sepolia` maps to `eip155:84532`.
 - Check `X402_PRICE_ANALYZE_USD` and `X402_PRICE_AGENT_ACTION_USD` are positive numbers.
 - Redeploy after changing Render environment variables.

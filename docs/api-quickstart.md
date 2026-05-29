@@ -10,7 +10,7 @@ The endpoint is x402-paid on Base mainnet and costs `$0.001` per analyze request
 
 Discovery validators may probe GET /v1/analyze. BS Man AI supports GET /v1/analyze as a paid discovery/capability probe and POST /v1/analyze as the paid analysis endpoint.
 
-BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Official Coinbase Bazaar auto-indexing may require CDP Facilitator settlement. The current production endpoint uses xpay facilitator on Base mainnet because CDP onboarding is not available in the current setup.
+BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Coinbase Bazaar indexing may require at least one successful paid settlement through the CDP Facilitator. CDP credentials must be configured only as runtime secrets; no CDP secrets belong in source control.
 
 Primary API endpoint:
 

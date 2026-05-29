@@ -10,20 +10,20 @@ This is a public-distribution and manual-submission working note. It does not cl
 
 ### 1. Coinbase CDP Bazaar
 
-Status: not ready for automatic Bazaar indexing until CDP Facilitator settlement is available.
+Status: ready for a controlled CDP Facilitator indexing run once production CDP credentials are configured in Render.
 
 Submission path:
 
 - There is no separate manual registration step for CDP Bazaar.
 - CDP Bazaar indexes routes after a Bazaar-enabled route completes at least one successful verify + settle flow through the CDP Facilitator.
-- Required later: CDP Facilitator URL, CDP credentials, `bazaarResourceServerExtension`, `declareDiscoveryExtension()`, `paymentPayload.resource`, and one successful CDP settlement.
+- Required for the run: CDP Facilitator URL, CDP credentials in Render only, `bazaarResourceServerExtension`, `declareDiscoveryExtension()`, `paymentPayload.resource`, and one successful CDP settlement.
 
 Current BS Man AI status:
 
 - Bazaar-compatible metadata exists.
 - Discovery validators may probe GET /v1/analyze. BS Man AI supports GET /v1/analyze as a paid discovery/capability probe and POST /v1/analyze as the paid analysis endpoint.
-- Production settlement currently uses xpay facilitator on Base mainnet.
-- Do not switch facilitator until Coinbase/CDP registration is available.
+- Production settlement is runtime-configurable with `X402_FACILITATOR_PROVIDER`.
+- Use `X402_FACILITATOR_PROVIDER=cdp` only for the controlled Bazaar indexing run and keep CDP credentials out of source control.
 
 Useful URLs:
 
@@ -163,7 +163,7 @@ OpenAPI: `https://api.callbsman.com/openapi.json`
 
 GitHub: `https://github.com/Askbsman/Bsman-ai`
 
-Note: BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Official Coinbase Bazaar auto-indexing may require CDP Facilitator settlement. The current production endpoint uses xpay facilitator on Base mainnet because CDP onboarding is not available in the current setup.
+Note: BS Man AI exposes Bazaar-compatible metadata for x402 discovery. Coinbase Bazaar indexing may require at least one successful paid settlement through the CDP Facilitator. CDP credentials must be configured only as runtime secrets; no CDP secrets belong in source control.
 
 ## One-Line Version
 
@@ -259,13 +259,13 @@ Docs:
 
 ## CDP/Bazaar Follow-Up
 
-Return to CDP/Bazaar when Coinbase registration is available.
+Use this section for a controlled CDP/Bazaar indexing run.
 
 Checklist:
 
-- Create or restore CDP registration.
-- Configure CDP Facilitator for a staging environment first.
-- Preserve current xpay production flow until CDP settlement is tested.
+- Configure CDP Facilitator credentials in Render only.
+- Keep price, `payTo`, Base mainnet, and resource URL unchanged.
+- Run the unpaid smoke check before spending funds.
 - Confirm `bazaarResourceServerExtension` remains registered.
 - Confirm `declareDiscoveryExtension()` metadata remains valid.
 - Ensure `paymentPayload.resource` is set to `https://api.callbsman.com/v1/analyze`.
